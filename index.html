@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>UKTC Quotation</title>
+<style>
+:root{--red:#E50914;--ink:#1d1d1b;--mut:#5f5f5f;--line:#d9d9d9;--soft:#f6f6f6}
+*{box-sizing:border-box}
+body{margin:0;background:#e9e9e9;font-family:"Segoe UI",Arial,Helvetica,sans-serif;color:var(--ink);font-size:10pt;line-height:1.4}
+.bar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar b{margin-right:auto}
+button{font:inherit;padding:7px 14px;border-radius:6px;border:1px solid #bbb;background:#fff;cursor:pointer}
+button.pri{background:var(--red);border-color:var(--red);color:#fff}
+.sheet{width:210mm;min-height:297mm;margin:16px auto;background:#fff;padding:14mm 15mm 16mm;box-shadow:0 1px 4px rgba(0,0,0,.15);position:relative}
+.top{display:flex;justify-content:space-between;align-items:flex-start}
+h1{font-size:20pt;margin:6mm 0 0;font-weight:700}
+.logo{height:22mm}
+.addr{display:flex;justify-content:space-between;margin-top:7mm;gap:10mm}
+.addr div{white-space:pre-line}
+.addr .r{text-align:right}
+.meta{display:grid;grid-template-columns:32mm 1fr 32mm 1fr;gap:1mm 3mm;margin-top:6mm;font-size:9.5pt}
+.meta .k{color:var(--red);font-weight:700}
+.banner{margin-top:5mm;padding:2.5mm 4mm;border-radius:2mm;font-size:9.5pt}
+.banner.draft{background:#fdecea;color:#8a1c14}
+.banner.ok{background:#eef6ee;color:#245c25}
+h3{font-size:10.5pt;margin:6mm 0 1.5mm;color:var(--red);text-transform:none}
+table{width:100%;border-collapse:collapse}
+th{font-size:9pt;text-align:left;color:var(--red);border-bottom:1.5px solid var(--red);padding:1.5mm 1.5mm}
+td{padding:1.6mm 1.5mm;border-bottom:.5px solid var(--line);vertical-align:top;font-size:9.5pt}
+.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.q{width:12mm}
+.tot{margin-top:5mm;margin-left:auto;width:78mm}
+.tot td{border:none;padding:1mm 1.5mm}
+.tot tr.g td{border-top:1.5px solid var(--ink);font-weight:700;font-size:11pt;padding-top:2mm}
+.tot .k{color:var(--red);font-weight:700}
+.opt td{color:#333}
+.opt input{transform:scale(1.15);margin:0}
+.small{font-size:8.3pt;color:#333}
+.small p{margin:0 0 1.4mm}
+ul.cl{margin:1mm 0 0 4mm;padding:0;font-size:8.6pt}
+ul.cl li{margin-bottom:.6mm}
+.acc{margin-top:6mm;border:1px solid var(--line);border-radius:2mm;padding:4mm}
+.acc h3{margin-top:0}
+.sig{display:grid;grid-template-columns:1fr 1fr;gap:4mm 8mm;margin-top:3mm}
+.sig div{border-bottom:.8px solid #888;padding:5mm 0 1mm;font-size:9pt;min-height:10mm}
+.sig label{display:block;font-size:8pt;color:var(--mut)}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:3mm 6mm;margin-top:3mm}
+.form label{font-size:8.5pt;color:var(--mut);display:block;margin-bottom:1mm}
+.form input[type=text]{width:100%;padding:2mm;font:inherit;border:1px solid #bbb;border-radius:1.5mm}
+.foot{position:absolute;left:15mm;right:15mm;bottom:8mm;display:flex;justify-content:space-between;align-items:flex-end;font-size:7.5pt;color:var(--mut)}
+.foot b{color:var(--ink);font-size:9pt}
+.terms{columns:2;column-gap:7mm;font-size:6.9pt;line-height:1.3;text-align:justify}
+.terms h4{font-size:7.4pt;margin:2.2mm 0 .8mm;color:var(--red);break-after:avoid}
+.terms p{margin:0 0 1mm}
+.terms ul,.terms ol{margin:0 0 1mm 3mm;padding-left:2mm}
+.err{max-width:160mm;margin:30mm auto;background:#fff;padding:10mm;border-radius:3mm}
+.ok-msg{background:#eef6ee;border:1px solid #9fcf9f;color:#245c25;padding:3mm 4mm;border-radius:2mm;margin-top:3mm}
+.fp{font-family:Consolas,monospace;font-size:7.5pt;color:var(--mut);word-break:break-all}
+@page{size:A4;margin:12mm 14mm 14mm}
+@media print{
+ body{background:#fff}
+ .bar,.noprint{display:none!important}
+ .sheet{margin:0;box-shadow:none;page-break-after:always;min-height:0;padding:0;width:auto}
+ .foot{position:static;margin-top:6mm}
+ h3{break-after:avoid}
+ .sheet:last-child{page-break-after:auto}
+ .acc{break-inside:avoid}
+ tr{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="bar noprint" id="bar"></div>
+<div id="root"></div>
+<template id="terms-src">
+<h4>1. DEFINITIONS</h4>
+<p>In these Terms &amp; Conditions (unless otherwise required);</p>
+<p>A) <strong>“Certification Scheme”</strong> means a third-party verification scheme that is open under transparent, fair and non-discriminatory terms to all organisations willing and able to comply with the scheme’s requirements, which certifies that a product complies with certain requirements, and for which the monitoring of compliance is objective, based on designated national or international Standard(s).</p>
+<p>B) <strong>“The Company”</strong> means United Kingdom Testing &amp; Certification Limited (UKTC), and also (where the context so permits) its assigns and any sub-contractor for the said Company.</p>
+<p>C) <strong>“Company’s Premises”</strong> means the premises mentioned in the Company quotation, agreement, or other contractual document in respect of the Services or if not so mentioned means the Company’s premises specified as such in the Contract.</p>
+<p>D) <strong>“The Contract”</strong> means the Agreement, these Terms &amp; Conditions of Sale, the Company’s acknowledgement of the Customer’s order for Services and/or similar and such order and if there shall be any inconsistency between the documents comprising the Contract they shall have precedence in the order herein listed.</p>
+<p>E) <strong>“The Customer”</strong> means the person, client, organisation, or company with whom the Contract is made by the Company whether directly or indirectly through an agent or factor who is acting for or instructed by or whose actions are ratified by such person, client, organisation, or company.</p>
+<p>F) <strong>“Customer’s Premises”</strong> means the premises specified as such in the Contract.</p>
+<p>G) <strong>“Parties”</strong> the parties to the Contract and “Party” means either of them.</p>
+<p>H) <strong>“Service(s)”</strong> means the supply of testing, product certification and/or other activities (if any) to be provided to the Customer by the Company pursuant to the Contract.</p>
+<p>I) <strong>“Specimen”</strong> means the products, articles, or items or components thereof and associated items (or any) of them described in the Contract for testing, product certification and/or other Service.</p>
+<p>J) <strong>“Standard”</strong> means a document which contains details of specified requirements and methodologies for testing and /or inspection and/or certification against which the System, product, installation, or person is assessed.</p>
+<p>K) <strong>“System”</strong> means the organisational structure, responsibilities, activities, resources, and events that together provide organised procedures and methods of implementation to ensure the capability of the Customer to meet a particular designated Standard.</p>
+<p>L) The <strong>“Terms and Conditions”</strong> of Sale, where appropriate, means the Terms and Conditions of Sale applicable to Customers seeking Testing, Product Certification and/or other Services as published by the Company.</p>
+<p>M) Words in the singular shall include the plural and vice versa.</p>
+<p>N) Reference to any gender shall include the others.</p>
+<p>O) References to legal persons shall include natural persons and vice versa.</p>
+<h4>2. FORMATION OF CONTRACT</h4>
+<p><strong>2.1</strong> These terms and conditions <strong>(“Terms and Conditions”)</strong> together with any <strong>(“Agreement”)</strong>, quotation, proposal, estimate or fee quote <strong>(“Quotation”)</strong> provided by or on behalf of the Company (as defined above) shall apply to all contracts for the supply of testing, product certification and/or other services <strong>(“Services”)</strong> carried out by <strong>United Kingdom Testing &amp; Certification Limited</strong> (a company registered in Scotland with registered number SC654601) providing the services contemplated therein on behalf of a customer <strong>(“Customer”).</strong></p>
+<p><strong>2.2</strong> These Terms &amp; Conditions shall be deemed to be incorporated in the Contract and in the case of any inconsistency with any order, letter of form of contract sent by the Customer to the Company or any other communication between the Customer and the Company whatever may be their respective dates, the provision of these Terms &amp; Conditions shall prevail unless expressly varied in writing and signed by a Director authorised signatory of the Company. Any concession made or latitude allowed by the Company to the Customer shall not affect the strict rights of the Company under the Contract. If in any particular case any of these Terms &amp; Conditions shall be held to be invalid or shall not apply to the Contract the other Terms &amp; Conditions shall continue in full force and effect. Any phrase introduced by the terms <strong>“including,” “include”, “in particular”</strong> or any similar expression, shall be construed as illustrative and shall not limit the sense of the words preceding those terms.</p>
+<p><strong>2.3</strong> All Quotations will be in writing, and unless previously withdrawn, the Company’s quotation and tenders shall remain valid for the period stated therein or if no period is stated for thirty (30) days from their date thereof. The Company may withdraw any such Quotation at any time. No Quotation given by the Company shall be an offer to contract with any person and no contract shall come into existence except in accordance with clause 2.4. Costs are based upon the limited information provided by the Customer at the time of Quotation.</p>
+<p><strong>2.4</strong> The Customer’s purchase order must be in writing and must be accompanied by sufficient information to enable the Company to execute the order to assist in achieving an efficient Service. This will include a purchase order number, reference, or authorisation, about each Specimen and/or Service. The Customer’s purchase order or the Customer’s acceptance of a Quotation constitutes an offer by the Customer to purchase the Services specified in the Quotation upon these Terms and Conditions. Notwithstanding that the Company may have given a detailed Quotation, no order shall be binding on the Company unless it has been accepted in writing by the Company, or (if earlier) by the Company starting to provide the Services, when a contract for the supply and purchase of those Services on these Terms and Conditions will be established (the <strong>“Contract”</strong>).</p>
+<p><strong>2.5</strong> It is the Customer’s responsibility to check that the Company’s written acceptance of the order is correct. Any discrepancy between the Customer’s order and the Company’s acceptance must be notified to the Company in writing within seven (7) days of the date of such acceptance. In the absence of such notification the Company shall be entitled to supply services in accordance with the acceptance, and the Customer shall be obliged to pay the agreed contract price therefore.</p>
+<p><strong>2.6</strong> No acceptance or acknowledgement, even if in writing and signed by the Company, of the Customer’s purchase order or any other document pertaining to the Services shall constitute acceptance of any provision of the Customer’s purchase order or any other document that conflicts with or adds to these Terms and Conditions unless the Company specifically agrees to such a variation of these Terms and Conditions pursuant to and in accordance with clause(s) 3.0 and 4.0.</p>
+<p><strong>2.7</strong> The delivery to the Company of any item for testing by the Company (a <strong>“Specimen”</strong>) or the delivery of any request by the Customer to the Company for the provision of any similar services shall, upon acceptance of that Specimen or request by the Company, constitute an “offer” (as referred to in clause 2.4). If the Company begins such testing deemed to have been accepted by the Company and a Contract shall be formed. These Terms and Conditions shall apply to that Contract.</p>
+<p><strong>2.8</strong> The Company’s obligations to supply Services depends on (Customer obligations):</p>
+<p><strong>2.8.1</strong> That the Customer has provided the documents, approvals and releases required and has given full details of relevant specifications;</p>
+<p><strong>2.8.2</strong> That an agreement has been reached on all details relating to the order;</p>
+<p><strong>2.8.3</strong> That all order amendments requested by the Customer have been formally confirmed by the Company in writing;</p>
+<p><strong>2.8.4</strong> That the Company has received any contractually agreed advance payment.</p>
+<p><strong>2.9</strong> Nothing contained in the foregoing paragraph shall affect the Company’s rights accruing from the Customer’s failure to fulfil, or delay in fulfilling these primary duties.</p>
+<h4>3. AMENDMENTS, MODIFICATIONS &amp; ADDITIONS</h4>
+<p><strong>3.1</strong> These Terms and Conditions may not be varied or waived by either party unless the variation or waiver is in writing and is signed by a duly authorised signatory of the Company. The variation or waiver must set out the condition(s) or sub-condition(s) to be varied or waived and the detail of each such variation or waiver.</p>
+<p><strong>3.2</strong> The Company reserves the right to refuse to make any amendments or modifications to an order or contract once it has been accepted. If, in its absolute discretion, the Company agrees to the Customer’s request for amendments or modifications after acceptance, the Company may impose additional charges to be notified in writing to the Customer.</p>
+<p><strong>3.3</strong> Although additions by the Customer to an order are welcomed, they will be treated as a new order, and should not be regarded by the Customer as necessarily being on the same Terms and Conditions as the main order or contract, unless expressly stated to be so by the Company in writing.</p>
+<h4>4. ADDITIONAL COSTS</h4>
+<p><strong>4.1</strong> The Company reserves the right to review and amend any Quotation prices where documentation, specification or other materials relating to the Contract have materially changed since the original Quotation was given or where additional services not envisaged by the Quotation are requested, for example, producing written descriptions of detailed procedures undertaken as part of the Services. For avoidance of all doubt, approval of such additional requests shall remain at the Company’s discretion.</p>
+<p><strong>4.2</strong> The Company reserves the right to make an additional charge for any extras ordered by the Customer and not specified in the quotation and also for the expense of all inspections, tests alterations or additions or any other work undertaken at the Customer's request. In particular but without prejudice to the generality of the foregoing, the Company may impose a charge for inspecting and/or testing Specimens, Goods and/or Services alleged by the Customer to be defective, or not in compliance with their contractual description, if the Company determines that the Specimens, Goods and/or Services are not defective and/or do comply with their contractual description and/or any defects are not the responsibility of the Company under the terms of the Contract.</p>
+<p><strong>4.3</strong> The Customer agrees to pay for any loss or extra cost incurred by the Company through the Customer’s instruction or lack of instruction or through failure or delay or through any act or default on the part of the Customer, its servants, agents or employees.</p>
+<p><strong>4.4</strong> Where the quoted price does not include carriage the Company shall determine the route and method of carriage and any special requirements of the Customer, which shall be subject to an additional charge.</p>
+<p><strong>4.5</strong> The Company may charge the Customer an extra sum for any site visits and abortive or excessive numbers of tenders prepared. Any packaging that may be provided is for delivery purposes only where this is included in the Contract. It is the Customer’s responsibility to dispose of all packaging after delivery.</p>
+<p><strong>4.6</strong> The Company’s quotations, estimates and tenders are invitations to the Customer to make an offer to enter into contract with the Company on the terms set out herein.</p>
+<p><strong>4.7</strong> All prices are exclusive of Value Added Tax and this will be charged at the appropriate tax rate.</p>
+<h4>5. POSTPONEMENT &amp; CANCELLATION</h4>
+<p><strong>5.1</strong> The Customer may postpone or cancel any order or Contract (in whole or in part) at any time. Should the Customer wish to postpone or cancel all or part of the order or Contract from the start date that was mutually agreed following acceptance by the Customer of the Quotation, and without prejudice to the Company’s other rights and remedies hereby reserved, the Company shall charge and be entitled to recover either all or part of the fee agreed as appropriate. This will include, in addition, the cost of any work performed up to the receipt by the Company of the notice of the cancellation, calculated in accordance with the applicable day rate for a relevant employee.</p>
+<p><strong>5.2</strong> Save as provided in clause(s) twenty (20) and twenty two (22) hereof Contracts or orders shall not be postponed or cancelled except by agreement in writing of both parties and upon the payments to the Company of such amount:</p>
+<table>
+<colgroup>
+<col style="width: 64%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Order postponed / cancelled by the Customer</strong></th>
+<th><strong>Charge</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Within 28 days of the agreed date of the performance of the Contract.</td>
+<td>25% of the fee</td>
+</tr>
+<tr class="even">
+<td>Within 14 days of the agreed date of the performance of the Contract.</td>
+<td>75% of the fee</td>
+</tr>
+<tr class="odd">
+<td>Within 7 days of the agreed date of the performance of the Contract.</td>
+<td>100% of the fee</td>
+</tr>
+</tbody>
+</table>
+<h4>6. PRICING</h4>
+<p><strong>6.1</strong> Pricing is quoted (and amended occasionally) for the Services and/or Goods agreed to be supplied in the Company’s final quotation made in writing to the Customer and/or pursuant to the Contract (Agreement) on the assumption that the information supplied by the Customer is accurate and complete.</p>
+<p><strong>6.2</strong> Any Goods and/or Service required or supplier in addition to the Goods/Services will be charged at the Company’s rates current at the time of supply.</p>
+<p><strong>6.3</strong> The Company reserves the right to adjust the invoice by the amount of any increase of additional costs after the prices are quoted, and the invoice shall be so adjusted payable as if it were the original contract price if:</p>
+<p><strong>6.3.1</strong> implementing any request by the Customer, for changes in, schedules, completion dates, quantities, design, and specifications.</p>
+<p><strong>6.3.2</strong> there are delays caused by the instruction of the Customer and/or by failure of the Customer to give adequate instructions or information to the Company.</p>
+<p><strong>6.3.3</strong> costs are increased resulting from the prohibition or other actions of any government.</p>
+<p><strong>6.4</strong> Expenses and disbursements may be charged separately in accordance with the quoted terms.</p>
+<p><strong>6.5</strong> All fees and expenses quoted are exclusive of all taxes including, but not limited to, value added or sales tax, which will be charged at the current rate of the country in which the services are supplied.</p>
+<p><strong>6.6</strong> The price quoted as payable for the Services is based upon the Services being carried out during the Company’s normal working hours (which are 8.00am to 17.00pm Monday to Friday), not overtime. If overtime is required, this will be worked at a rate to be notified.</p>
+<h4>7. TERMS OF PAYMENT</h4>
+<p><strong>7.1</strong> Unless otherwise agreed by the Company in writing, and subject always to the credit provision of clause 8 hereof, payment for Services and/or Goods shall be due thirty (30) days from date of service provision or as agreed in the Quotation. Payment shall be made in full, without set off or deduction.</p>
+<p><strong>7.2</strong> If the Services and/or Goods are provided or delivered in instalments on discrete occasions, the Company shall be entitled to invoice each instalment as and when provision of Service or delivery thereof has been made or performance thereof has been affected. Payment shall be due in respect of each instalment whereof Service has been provided made or whereof performance has been affected notwithstanding non-delivery of other instalments or other default on the Company’s part.</p>
+<p><strong>7.3</strong> If upon the Terms applicable to any order the price shall be payable by instalments or if the Customer has agreed to take specified Services or quantities of Goods at specified times a default by the Customer of the payment of any due instalment or the failure to give delivery instructions in respect of any quantity of Goods outstanding shall cause the whole of the balance of the price to become due forthwith and the Company shall be entitled to suspend work and further Services and/or deliveries in respect of such order until payment has been made.</p>
+<p><strong>7.4</strong> The price of Services and/or Goods shall be due in full to the Company in accordance with the Terms of the Contract and the Customer shall not be entitled to exercise any set off lien or any other similar right or claim.</p>
+<p><strong>7.5</strong> The time of payment shall be in the essence of the Contract.</p>
+<p><strong>7.6</strong> In default of payment within the thirty (30) days from date of service provision or as agreed in the Quotation, the Company may suspend any further services carried out for the Customer; withhold the provision of Reports and/or suspend the provision of all Services and/or terminate the Contract (including suspension or withdrawal of Certification), (as defined in clause 9.0), alter or withdraw credit terms; and amend terms, prices, or service levels. The condition is without prejudice to the Company’s right to deem the contract repudiated by any fundamental breach of contract by the Customer (which expression shall include any failure to make payment within the payment terms agreed).</p>
+<p><strong>7.7</strong> If not paid within the period, then without prejudice to any other right of the Company, reserves the right to charge interest (at the statutory rate on commercial debts then applicable) from the due date until payment in full.</p>
+<p><strong>7.8</strong> Furthermore, without prejudice to the above the Company shall be entitled to recover from the Customer all reasonable legal, administrative, and other costs and expenses incurred in recovering overdue payments of the price of the Goods and/or Services.</p>
+<p><strong>7.9</strong> The Customer undertakes that during the provision of Services and for six (6) months following completion thereof, the Customer shall not:</p>
+<p><strong>7.9.1</strong> solicit or entice away (or assist anyone else in soliciting or enticing away) any member of the Company’s staff with whom the Customer has had dealings in connection with the Contract and/or provision of the Services during the twelve (12) months immediately prior to the earlier of the date of the Customer’s purchase order on the date of the Quotation; or</p>
+<p><strong>7.9.2</strong> employ (directly or through a third party) any person as referred to in clause 7.9.1 or engage them in any way to provide services to the Customer.</p>
+<p><strong>7.10</strong> This undertaking shall not apply in respect of any member of the Company’s staff who without having been previously approached directly or indirectly by the Customer responds to an advertisement placed by the Customer or on the Customer’s behalf.</p>
+<p><strong>7.11</strong> In the event of a breach of this undertaking, which leads to the departure of any person as referred to in clause 7.9.1, the Customer will pay to the Company, on demand, a sum equivalent to fifty per cent (50%) of the total remuneration package paid by the Company to the individual prior to their departure. The Customer acknowledges that this provision is a fair and reasonable term intended to be a genuine assessment of the likely loss to the Company.</p>
+<h4>8. CREDIT TERMS</h4>
+<p><strong>8.1</strong> The provision of a credit facility is a matter for the unfettered discretion of the Company, as is the amount of credit extended. Should a credit facility be offered, it is on the condition that it may be reduced or cancelled without prior notice. On withdrawal of a credit facility, all amounts owing there under shall become immediately payable to the Company.</p>
+<p><strong>8.2</strong> Credit Terms, where granted, shall apply only so long as the amount outstanding on this or any other contract between the Company and the Customer does not exceed the Customer’s credit limit. Should the credit limit be exceeded, or if it would be exceeded by further services, payment before further services will be required.</p>
+<p><strong>8.3</strong> Credit facilities will not be approved for orders of a price less than £5,000 (excluding VAT) except where a current trading account exists. Without prejudice to the Company’s rights to refuse or withdraw any credit facility or alter the amount of credit extended without notice, credit shall be extended for thirty (30) days from date of service provision and the time within which the Customer is to pay for the Service shall be of the essence of the Contract.</p>
+<p><strong>8.4</strong> If credit repayment is overdue on this or any other Contract between the Company and the Customer, then the Company may refuse to supply any further services and/or goods to the Customer under any Contract that it may have with the Customer, without liability to the Company. The Customer shall be liable for any loss, damage or expense arising out of any withdrawal or reduction of credit or refusal to supply further services and/or goods in accordance with this clause, including any loss damage or expense suffered by the Company thereby.</p>
+<h4>9. SERVICES</h4>
+<p><strong>9.1</strong> Subject to the remaining clauses of this clause 9.0, the Company warrants that it will complete the Services in a satisfactory and efficient manner, consistent with industry standards. The Customer expressly acknowledges and agrees that the Company gives no warranty that any result or objective can be achieved through the Services and that, where results are based on smaller scale tests and theoretical studies, results may require careful validation in order to be extrapolated to a production scale.</p>
+<p><strong>9.2</strong> The Company will use its reasonable endeavours to complete Services and provide written information, results, technical reports, test or inspection records, drawings, recommendations, advice or similar in respect of the Services <strong>(“the Report”)</strong> thereon to the Customer by any date reasonably requested in writing by the Customer, but the Company shall not be liable to the Customer for:</p>
+<p>(i) any delay in the performance of any obligation under the Contract; or</p>
+<p>(ii) damages suffered by the Customer by reason of such delay.</p>
+<p><strong>9.3</strong> Where laboratory Services are provided, the Company may refuse to perform or terminate a test prematurely if it has reasonable cause to do so. Reasons may include but are not limited to extreme levels of heat which may damage testing equipment.</p>
+<p><strong>9.4</strong> The Company’s obligation to complete Services under the Contract shall be subject to any obligation it may have to comply with any law or other regulation binding on it which may be in force from time to time.</p>
+<p><strong>9.5</strong> No employee, agent or other person is authorised to give any warranty or make any representation on behalf of the Company in relation to the Contract, or to assume for the Company any other liability in connection with the Services, unless such warranty, representation or assumption of liability is given to the Customer in accordance with clause 3.1.</p>
+<p><strong>9.6</strong> The Customer represents and warrants to the Company the completeness and accuracy of all documents and information supplied to the Company for the purposes of the Company fulfilling the Services, both at the time of supply and subsequently.</p>
+<p><strong>9.7</strong> Reports are issued on the basis of information known to the Company at the time the Services are carried out. Although the Company will use all reasonable endeavours to ensure accuracy, the Services depend, inter alia, on the effective co-operation of the Customer, its employees and on the information submitted to the Company. All Reports are prepared on the basis that:</p>
+<p><strong>9.7.1</strong> there is no responsibility to any person or body other than the Customer;</p>
+<p><strong>9.7.2</strong> they are not produced for any particular purpose and no statement is to be deemed, in any circumstances to be or give rise to a representation, undertaking, warranty or contractual condition unless specifically stated;</p>
+<p><strong>9.7.3</strong> the Report is determined solely by the professional analysis undertaken by the Company’s employees on each individual Contract and any forecasts by the Company of the results is an estimate only;</p>
+<p><strong>9.7.4</strong> it is the customers responsibility to inform the laboratory during review of the contract if a statement of conformity is required, as statements of conformity shall not be made or implied as part of the test report.</p>
+<p><strong>9.7.5</strong> the Company is entitled to be paid for the provision of Services irrespective of the results or conclusions reached in the Report;</p>
+<p><strong>9.7.6</strong> the results of the Services shall address the items and information submitted only and are not to be regarded as representative of any larger population from which the Specimen was taken; and</p>
+<p><strong>9.7.7</strong> the results are final and approved by the Company. The Company shall be under no liability where the Customer has acted on preliminary, unapproved results or advice.</p>
+<h4>10. USE OF REPORTS</h4>
+<p><strong>10.1</strong> The Reports constitute confidential information that is to be protected and shall be solely used to:</p>
+<p><strong>10.1.1</strong> assist the Customer in completing its internal requirements and the Company in performing Services or the Customer;</p>
+<p><strong>10.1.2</strong> comply with the Customer’s customer and other third-party requirements for the delivery and use of the data recited in the Reports;</p>
+<p><strong>10.1.3</strong> present or respond on a claim in a court of law (provided that, where this is the purpose for which the Report is instructed, this has been agreed with the Company in advance of the Report being instructed); or</p>
+<p><strong>10.1.4</strong> present or respond as required by law or any regulatory body.</p>
+<p><strong>10.2</strong> The Customer hereby undertakes that they shall not:</p>
+<p>except as set out in sub-clause 10.1,</p>
+<p><strong>10.2.1</strong> disclose a Report (or information contained within a Report) to any third party without the prior written consent of the Company;</p>
+<p><strong>10.2.2</strong> replicate or present a Report except in full as delivered by the Company without the prior written consent of the Company; or</p>
+<p><strong>10.2.3</strong> use a Report, or any portion thereof, in any manner that might reflect unfavourably upon the Company, or which might be, or might include statements, interpretations or comments that could be misleading or false.</p>
+<h4>11. CUSTOMER PROPERTY</h4>
+<p><strong>11.1</strong> The Customer shall supply as much information as possible, including a purchase order number, reference or authorisation, about each Specimen and/or Service requirement in order to assist in achieving an efficient service. If a Customer provides the Company with detailed instructions in writing as to the treatment and handling of particular items of its property, the Company will use all reasonable endeavours to comply with such instructions.</p>
+<p><strong>11.2</strong> The Customer shall inform the Company in writing prior to the Company carrying out any Service on a Customer Specimen that is of an unstable or dangerous nature, as well as notify the Company of any potential or actual health &amp; safety hazards relating to the Specimen and arising from the Company’s performance of the Services . The Customer shall also provide instruction on the safe handling of the Specimen and shall accept full responsibility for appropriate safety labelling pertaining to the Specimen and any equipment provided to the Company.</p>
+<p><strong>11.3</strong> The Customer acknowledges and expressly agrees that, subject to sub-clause 11.4 where the Contract specifies that the Services include non-destructive testing of the Specimen, the performance of the Services may damage or destroy any and all Specimens and any other materials or property delivered by Customers to the Company in relation to the Contract. Under no circumstances will the Company be responsible for any additional costs or damages, including consequential damages and indirect losses or costs, resulting from destruction or loss of the Customer’s property.</p>
+<p><strong>11.4</strong> When testing, analysis or other services are carried out, the Company shall not be liable in respect of any losses or costs resulting from damage to or destruction of any property belonging to the Customer unless the Customer notifies the Company in writing prior to delivery to the Company and the property itself delivered to the Company is clearly marked “Do not Destroy or Damage”. If such notice is given and the Customer’s property is so marked, the Company’s liability for damage to or the destruction of the Customer’s property is limited to the lesser of:</p>
+<p><strong>11.4.1</strong> the value of the Customer’s property; or</p>
+<p><strong>11.4.2</strong> the cost of the Services performed on the damaged property pursuant to the Contract.</p>
+<h4>12. DELIVERY</h4>
+<p><strong>12.1</strong> The Company will at the Customer’s reasonable written request, deliver the Customer’s property (other than which is destroyed as part of the Services) back to the Customer after performing Services relating to that property. The Company may use any method of delivery that it reasonably decides and will do as the agent of the Customer and will not have liability in respect of any such item so delivered. The Company may at its discretion instruct any person delivering such property to the Customer to invoice that Customer directly in respect of that delivery and the Customer shall make any and all claims for property damaged in transit directly and solely against such delivery company or other person.</p>
+<p><strong>12.2</strong> Unless specifically instructed to the contrary in writing by the Customer, the Company reserves the right to properly dispose of Customer’s property after one (1) week from completion of the Services. The Company reserves the right to invoice the Customer for any disposal costs. Where the property of the Customer is, in the sole opinion of the Company too bulky or unstable to allow storage time of less than one (1) week, it will be destroyed immediately.</p>
+<h4>13. TITLE AND RISK</h4>
+<p>Title to the Customer’s property which is delivered to the Company and all risk of loss or damage to such property (except for loss or damage caused by the Company and for which and to the extent that the Company accepts liability under these Terms and Conditions) shall remain with the Customer at all times. The Customer shall be responsible for effecting and maintaining their own insurance cover in relation thereto, against loss or damage by accident, fire, theft, and other risks usually covered by insurance in an amount at least equal to the balance of the price, it being hereby acknowledged by the Customer that the charges of the Company do not include insurance. The Company may retain all property delivered to it until all sums due and owing to the Company by the Customer have been paid.</p>
+<h4>14. LIMITATION OF LIABILITY</h4>
+<p><strong>14.1</strong> This clause fourteen (14) sets out the entire financial liability of the Company, its employees, agents and sub-contractors to the Customer in respect of any breach of Contract, any use made of Specimens or any part of them on which the Services are carried out and any representation, statement or tortious act or omission (including negligence or breach of statutory duty) arising under or in connection with the Contract.</p>
+<p><strong>14.2</strong> Other than expressly set out herein and as specifically warranted in writing to the Customer by an officer or duly authorised signatory of the Company in accordance with sub-clause 3.1, all warranties, conditions and other terms implied by statute or common law are, to the fullest extent permitted by law, excluded from the Contract.</p>
+<p><strong>14.3 Subject to the remaining sub-clauses of this clause fourteen (14), the Company shall not be liable, whether in tort (including for negligence or breach of statutory duty), contract, misrepresentation or otherwise for:</strong></p>
+<p><strong>14.3.1 Loss of profits; loss of business; loss of revenue; loss of markets; loss or damage incurred as a result of a third party claim; depletion of goodwill and/or similar losses; loss of goods; loss of contract; loss of anticipated savings; loss of use; loss or corruption of data or information; ex gratia payments; or</strong></p>
+<p><strong>14.3.2 any special, indirect, or consequential loss, costs, penalties or expenses, charges, damages, fines; or pure economic loss.</strong></p>
+<p><strong>14.4 Subject to clauses 14.3 and 14.8, the company’s total liability to the Customer in Contract, tort (including claims for negligence or breach of statutory duty) misrepresentation, restitution or otherwise arising in connection with the performance or contemplated performance of the Contract shall in all circumstances not</strong> <strong>exceed the greater of:</strong></p>
+<p><strong>(i) the price of the Services and/or Specimen(s); or</strong></p>
+<p><strong>(ii) £5,000.00 (five thousand pounds); or</strong></p>
+<p><strong>(iii) the consideration for the Services payable each year under the Contract that are subject to the claim.</strong></p>
+<p><strong>14.5</strong> Save in the case of fraud or fraudulent concealment by the Company, the Company shall be under no liability in respect of any claim under the Contract and any such claim will be wholly barred and unenforceable unless:</p>
+<p><strong>14.5.1</strong> the Customer notifies the Company in detail and in writing of the alleged basis for the claim within two (2) months of the Customer becoming aware thereof and within one (1) year after the completion of the Services to which the claim relates; and</p>
+<p><strong>14.5.2</strong> the Company is permitted to inspect any and all property with respect to which the Services are claimed to have been defective or to which the Customer’s claim otherwise relates.</p>
+<p><strong>14.6</strong> Any terms, conditions, or warranties (whether express or implied by statute, common law or arising from conduct or a previous course of dealing or trade custom or usage) as to the performance of the Services or as to the quality of Goods or their fitness for any particular purpose (even if that purpose is made known expressly or by implication to the Company or as to the correspondence of the Goods with any description or specimen) are hereby expressly negated.</p>
+<p><strong>14.7</strong> The Customer hereby acknowledges that the above provisions of this clause fourteen (14) are reasonable and reflected in the price which would be higher without those provisions and the Customer will accept such risk and/or insure accordingly.</p>
+<p><strong>14.9</strong> Nothing in these Terms and Conditions limits or excludes the liability of the Company for:</p>
+<p><strong>14.9.1</strong> death or personal injury resulting from negligence;</p>
+<p><strong>14.9.2</strong> liability incurred by the Customer as a result of fraud or fraudulent misrepresentation by the Company; or</p>
+<p><strong>14.9.3</strong> any other matter which may not be limited or excluded by law.</p>
+<p><strong>14.10</strong> This clause fourteen (14) shall survive termination of the Contract.</p>
+<h4>15. INDEMNITY</h4>
+<p><strong>15.1</strong> The Customer agrees to indemnify, keep indemnified and hold harmless the Company from and against all losses which the Company may suffer or incur arising out of or as a result of:</p>
+<p>1<strong>5.1.1</strong> breach of any law by the Customer in connection with the performance of the Services;</p>
+<p><strong>15.1.2</strong> any claim threatened or made against the Company by any third party arising out of the Services or out of any delay in performing or failure to perform the Services (even if such a claim is solely or partly attributable to the fault or negligence of the Company) to the extent such claim is in excess paid for the Services under the Contract that are subject to the claim; or</p>
+<p><strong>15.1.3</strong> any claims arising as a result of any misuse or unauthorised use of any Reports and/or Product Certificates issued by the Company or any Intellectual Property Rights belonging to the Company (including trademarks, infringement or alleged infringement of patents, copyright, design right or other intellectual property right occasioned by the performance) pursuant to this Contract.</p>
+<p>Notwithstanding any other provision of these Terms and Conditions, the Customer’s liability under this indemnity shall be unlimited.</p>
+<p><strong>15.1.4</strong> losses to which the Company may become liable as a result of a claim that the use of any data, equipment or other materials supplied by the Customer for the performance of the Services involves the infringement of any Intellectual Property Rights of any third party.</p>
+<p><strong>15.1.5</strong> This clause fifteen (15) shall survive termination of the Contract.</p>
+<h4>16. INTELLECTUAL PROPERTY</h4>
+<p>16.1 In this clause sixteen (16), the following definitions apply;</p>
+<p><strong>Intellectual Property Rights:</strong> all patents, copyright and related rights, trademarks, service marks, rights to inventions, utility models, trade, business and domain names, rights in trade dress or get-up, rights in goodwill or to sue for passing off, unfair competition rights, rights in computer software, rights in designs, database rights, topography rights, moral rights, rights in confidential information (including knowhow and trade secrets) and any other intellectual property rights (now existing or hereafter created), in each case whether registered or unregistered and including all applications for and renewals or extensions of such rights, and all similar or equivalent rights or forms of protection in any part of the world;</p>
+<p><strong>16.2</strong> All Intellectual Property Rights (including copyright in records, scientific documentary, primary data, or electronic means of handling data) produced during any Service shall belong to and remain the property of the Company unless otherwise expressly agreed as part of the Contract.</p>
+<p><strong>16.3</strong> Ownership and copyright in the Report shall remain with the Company. Upon the Customer discharging all their obligations under the Contract, including payment, the Customer will obtain an irrevocable, royalty-free, non-exclusive licence to use the Report (including the right to sub-license), subject to the terms of sub-clause 16.2 and this sub-clause 16.3.</p>
+<p><strong>16.4</strong> All Intellectual Property Rights in all trademark(s), service mark(s), certification mark(s) and other names and logos owned by the Company shall remain the property of the Company and cannot be sold or licenced by the Customer.</p>
+<p><strong>16.5</strong> Except for the rights to set forth in clause ten (10), this Contract does not grant and shall not be construed as granting, any rights to either party to any name or mark of the other party. Neither party is granted any right to the other party’s name in connection with any publication and may not give any press release or make any other public announcement regarding this Contract, the Services, or any transaction between the parties without the express prior written consent of the other party.</p>
+<h4>17. BUILDING REGULATIONS</h4>
+<p>It will be the Customer’s sole responsibility to ensure that any Services or Goods ordered comply with the building regulations and any other relevant legal provisions or statutory instruments in force from time to time, and the Customer shall indemnify and hold the Company harmless and indemnified against any liability or adverse consequence of whatsoever nature as the Company may, at any time hereafter have to suffer or sustain as a result or in consequence of the Customer’s failure to accurately comply.</p>
+<h4>18. DISPUTES AND SET-OFF</h4>
+<p><strong>18.1</strong> Any liability upon the Company is subject to the Terms of Payment and all other obligations upon the Customer being strictly observed.</p>
+<p><strong>18.2</strong> The Customer shall not be entitled to withhold payment of any amount payable to the Company under the</p>
+<p>Contract or any other Contract because of any claim of the Customer in respect of any alleged breach of the Contract or any other Contract.</p>
+<h4>19. COMPANY PREMISES</h4>
+<p><strong>19.1</strong> The Company’s premises (the “Premises”) are a designated security area and:</p>
+<p><strong>19.1.1</strong> the Company reserves the right to refuse admission to the premises.</p>
+<p><strong>19.1.2</strong> unless otherwise agreed in advance by the Company, one visitor per Customer may be admitted on request to witness the Services conducted for that Customer; and</p>
+<p><strong>19.1.3</strong> visitors to the Premises shall conform to the Company’s regulations and procedures.</p>
+<p><strong>19.2</strong> Where any aspect of the Service is undertaken on premises not occupied by the Company or under its direct control, the Customer must ensure that all necessary safety measures are in place to comply with all applicable health &amp; safety regulations and save as otherwise agreed in writing between the parties.</p>
+<h4>20. TERMINATION AND SUSPENSION</h4>
+<p><strong>20.1</strong> The Company shall be entitled without prejudice to its other rights and remedies to:</p>
+<p><strong>20.2</strong> Terminate wholly or in part any or every contract between the Company and the Customer.</p>
+<p><strong>20.3</strong> Suspend any further Services under any or every such Contract.</p>
+<p><strong>20.4</strong> Demand repayment for undelivered Services or Goods, in any of the following events:</p>
+<p><strong>20.4</strong>.<strong>1</strong> if any sum owing to the Company under the Contract or any other Contract is unpaid after the due date;</p>
+<p><strong>20.4.2</strong> if the Customer refuses to take delivery of any Services or Goods in breach of Contract;</p>
+<p><strong>20.4.3</strong> if the Customer fails to provide security for credit required by the Contract;</p>
+<p><strong>20.4.4</strong> if the Company has bona fide doubts as to the Customer’s solvency or credit worthiness;</p>
+<p><strong>20.4.5</strong> if the Customer is in breach of any Term of the Contract or has committed a breach of any other Contract between the Customer and the Company.</p>
+<p><strong>20.5</strong> On termination of the Contract for any reason, the Customer shall immediately pay to the Company all indebtedness to the Company with applicable interest.</p>
+<p><strong>20.6</strong> Termination of the Contract, however arising, shall not affect any of the parties’ rights, remedies, obligations, and liabilities that have accrued as at termination.</p>
+<p><strong>20.7</strong> Clauses which expressly or by implication survive termination of the Contract shall continue in full force and effect.</p>
+<h4>21. DEFAULT OR INSOVENCY OF BUYER</h4>
+<p>If the Customer shall be in breach of any of its obligations under the Contract or if any distress or execution shall be levied on the Customer’s property or assets or if the Customer shall make or offer to make any arrangement or composition with their creditors or commit any act of bankruptcy or if any bankruptcy petition be presented against them or (if the Customer is a company) if any resolution or petition to wind up such company shall be passed or presented or if a receiver, administrative receiver or administrator of the whole of any part of such company’s undertaking property or assets shall be appointed, the Company in its discretion and without prejudice to any other right or claim may by notice in writing determine wholly or in part any and every contract between the Company and the Customer or may (without prejudice to the Company’s rights subsequently to determine the Contract for the same cause should it so decide) by notice in writing suspend further Services until any defaults by the Customer be remedied.</p>
+<h4>22. LEGAL AND OTHER PROCEEDINGS</h4>
+<p><strong>22.1</strong> In the event that the Customer requires the Company to present the results or findings of Services carried out by the Company in witness statements, court hearings or other legal proceedings, the Customer shall pay to the Company such costs and fees for such presentations and the preparation thereof as the Company may charge to customers generally from time to time for such services and the Customer shall be liable for such costs in addition to monies paid under the Contract.</p>
+<p><strong>22.2</strong> In the event that the Company is required by a party other than the Customer to present the results or findings of Services carried out by the Company to the Customer in any legal proceedings relating to the Customer, the Customer shall pay all costs and fees arising from any services which the Company is required to do as a result, including the preparation of any witness statement and the preparation for and appearance at any court hearing. The Customer shall pay all such costs, whether or not the Customer has paid all outstanding monies under the Contract and whether or not the Company has closed the Customer’s file in respect of the matter.</p>
+<p><strong>22.3</strong> If any aspect or element of the Services (including any Specimen) is, or is likely to be, the subject of or relevant to legal proceedings, this fact must be notified to the Company in writing before Services are conducted. If that fact is not disclosed to the Company at that stage, the Company may not, in its absolute discretion, be prepared to provide expert testimony.</p>
+<p><strong>22.4</strong> This clause twenty two (22) shall survive termination of the Contract.</p>
+<h4>23. SUB-CONTRACTING</h4>
+<p><strong>23.1</strong> Unless otherwise restricted by the terms of the Contract and/or obligations under accreditation or governing approval, the Company shall be entitled, in its absolute discretion, to sub-contract the whole or any part of the Service thereof to any person.</p>
+<p><strong>23.2</strong> The Company may assign, delegate, license or hold on trust, all or any part of its rights or obligations under the Contract.</p>
+<p><strong>23.3</strong> The Contract is personal to the Customer which may not assign, delegate or license, hold on trust or sub-contract all or any of its rights or obligations under the Contract without the Company’s prior written consent.</p>
+<h4>24. FORCE MAJEURE</h4>
+<p>The Parties shall not be liable to perform any obligation under the Contract if inability to perform is caused directly or indirectly through any circumstances beyond the party’s reasonable control. This includes, but is not limited to, strikes, lock outs, sanctions, lockdowns or other government restrictions, accident, war, fire, pandemic, reduction in or unavailability of power at the Company Premises, breakdown of plant or machinery or shortage or unavailability of materials or services from normal sources of supply or the existence of any circumstances making performance commercially impracticable.</p>
+<h4>25. CONFIDENTIALITY</h4>
+<p>For the purposes of this clause twenty five (25), <strong>“Confidential Information”</strong> shall mean all information which a party may have or acquire before or after the date of the Contract which relates to a party’s business, products, developments, trade secrets, know-how or other matters connected with the Services and information concerning a party’s relationship with actual or potential clients, customers or suppliers and all other information designated as confidential or which ought reasonably to be considered confidential.</p>
+<p><strong>25.1</strong> Each party shall keep all Confidential Information of the other party in the strictest confidence. Save for the purposes of fulfilling its obligations under the Contract, the Parties shall not, without the prior written consent of the other, disclose, divulge, or grant access to the Confidential Information which it has received and shall not permit any of its employees, agents, or officers to disclose, divulge or grant access to such Confidential Information. Notwithstanding clause 25.1, These restrictions shall not apply to:</p>
+<p><strong>25.1.1</strong> Confidential communications between the Parties and their respective professional advisers:</p>
+<p><strong>25.1.2</strong> it is required to do so by any governmental, local government or regulatory authority, any accreditation body or by law (but then only to the extent it is strictly required to do so);</p>
+<p><strong>25.2.2</strong> it is strictly necessary for the purpose only of obtaining professional advice in relation to the Contract;</p>
+<p><strong>25.2.3</strong> it was already known or information which, after the date of the Contract is information which subsequently becomes public knowledge other than by breach of the Party concerned or which is obtained by the Party from a source independent of the other;</p>
+<p><strong>25.2</strong> The obligations of the parties under this clause twenty five (25) shall continue to apply without limit of time.</p>
+<h4>26. ENTIRE AGREEMENT</h4>
+<p><strong>26.1</strong> The Contract constitutes the entire agreement between the parties and supersedes and extinguishes all previous agreements, promises, assurances, warranties, representations, and understandings between them, whether written or oral, relating to its subject matter.</p>
+<p><strong>26.2</strong> Each party agrees that it shall have no remedies in respect of any statement, representation, assurance, or warranty (whether made innocently or negligently) that is not set out in the Contract. Each party agrees that it shall have no claim for innocent or negligent misrepresentation or negligent misstatement based on any statement in the Contract.</p>
+<h4>27. REPRESENTATION</h4>
+<p>No statement, description, information, warranty, condition, or recommendation contained in any catalogue, price list, advertisement or communication or made verbally by any of the Company’s agents or employees shall be construed to enlarge, vary or override in any way any of these Terms &amp; Conditions.</p>
+<h4>28. SEVERABILITY</h4>
+<p>If any provision or remedy herein provided for be invalid or unenforceable or unlawful under any applicable law in whole or in part, it shall be deemed to be amended in so far as it is possible to do so in order to make it enforceable whilst retaining its purpose or severed from the Contract if it is not possible to do so and the remaining provisions of the Terms and Conditions, including any default remedies, shall be given effect in accordance with the intent hereof. In the Company’s sole discretion, it may terminate the Contract by not less than seven (7) days’ written notice to the Customer in the event that it considers that such a deletion will have a materially adverse effect on its rights under the Contract.</p>
+<h4>29. NO PARTNERSHIP OR AGENCY</h4>
+<p><strong>29.1</strong> Nothing in the Contract is intended to, or shall be deemed to, establish any partnership or joint venture between any of the parties, constitute any party, the agent of another party, or authorise any party to make or enter into any commitments for or on behalf of any other party.</p>
+<p><strong>29.2</strong> Each party confirms it is acting on its own behalf and not for the benefit of any other person.</p>
+<h4>30. THIRD PARTIES</h4>
+<p>A person who is not a party to the Contract shall not have any rights under the Contracts (Rights of Third Parties) Act 1999 to enforce any term of the Contract., save for the officers, employees, or agents of UKTC.</p>
+<h4>31. DATA PROTECTION</h4>
+<p>For the purposes of this clause thirty one (31), <strong>“Data Protection Laws”</strong> shall include the Data Protection Act 2018 and the General Data Protection Regulations (GDPR) 25.05.18 and in each case as amended, replaced, or superseded from time to time and/or any other applicable data protection legislation in force.</p>
+<p><strong>31.1</strong> Within this clause thirty one (31), <strong>“Process, Processed, Processing”, “Data Processor”, “Data Controller”, “Data Subject”, “Personal Data” and “Personal Data Breach”</strong> shall have the same meaning as in the Data Protection Laws.</p>
+<p><strong>31.2</strong> The Customer agrees not to provide or otherwise make available Personal Data to the Company, other than business contact information (for example, business, telephone number, job title, and e-mail address), unless otherwise required for the provision of Services, in which case such additional Personal Data shall be specifically identified in advance by the Customer and agreed to in writing by the Company.</p>
+<p><strong>31.3</strong> Where Personal Data is Processed by a party under or in connection with the Contract that party, as Data Processor, shall:</p>
+<p><strong>31.3.1</strong> not Process, transfer, modify, amend or alter the Personal Data or disclose or permit the disclosure of the Personal Data to any third party other than as required to meet the other party’s (as Data Controller) lawful, documented and reasonable instructions (which shall unless otherwise agreed be to process Personal Data as necessary to provide the Services pursuant to the Contract), unless required by a law to which the Data Processor is subject, provided that in such a case, the Data Processor shall inform the Data Controller of that requirement before Processing, unless that law prohibits such information on important grounds of public interest. In particular, the Data Controller instructs the Data Processor to transfer data outside of the European Economic Area subject to the Data Processor complying with the relevant requirements of the GDPR;</p>
+<p><strong>31.3.2</strong> Upon becoming aware of a Personal Data Breach:</p>
+<p>(i) notify the Data Controller without undue delay; and (ii) provide reasonable co-operation (at the expense of the Data Controller) to the Data Controller in connection with the Personal Data Breach;</p>
+<p><strong>31.3.3</strong> upon receiving any request, complaint or communication relating to the Data Controller’s obligations under Data Protection Laws:</p>
+<ol type="i">
+<li><p>notify the Data Controller as soon as reasonably practicable;</p></li>
+<li><p>assist the Data Controller by implementing the appropriate technical and organisational measures to enable the Data Controller to comply with any exercise of rights by a Data Subject under any Data Protection Laws in respect of Personal Data processed by the Data Processor under this Contract or comply with any assessment, enquiry, notice or investigation under any Data Protection Laws, provided in each case that the Data Controller shall reimburse the Data Processor in full for all expenses reasonably incurred by the Data Processor performing its obligations under this sub-clause 31.3.3.</p></li>
+</ol>
+<p><strong>31.3.4</strong> ensure at all times it has in place appropriate technical and organisational measures as required by GDPR;</p>
+<p><strong>31.3.5</strong> ensure that its employees who may have access to the Personal Data are subject to appropriate confidentiality obligations;</p>
+<p><strong>31.3.6</strong> implement appropriate organisational and technical measures to assist the Data Controller in meeting its obligations under GDPR taking into account the nature of processing and the information available to the Data Processor;</p>
+<p><strong>31.3.7</strong> not authorise any sub-contractor to process the Personal Data <strong>(“sub-processor”)</strong> other than with the prior written consent of the Data Controller, it being acknowledged that the Data Controller consents to the appointment of sub-processors who may occasionally be engaged by the Data Processor and the sub-processor which are no less protective than those set out of this clause thirty one (31), provided that the Data Processor notifies the Data Controller of the identity of such sub-processors and any change to them; and</p>
+<p><strong>31.3.8</strong> cease processing the Personal Data within ninety (90) days upon the termination or expiry of this Contract or, if sooner, the Service to which it relates and as soon as possible thereafter (at the Data Controller’s option), either return, or securely wipe from its systems, the Personal Data and any copies of it or of the information it contains, other than to the extent that the Data Processor is required to retain the Personal Data due to a legal or regulatory requirement, or by a requirement of an accreditation body.</p>
+<p><strong>31.4</strong> The Data Processor shall make available to the Data Controller such further information and (as applicable) allow for and contribute to any audit or review exercise, conducted by the Data Controller or an auditor mandated by the Data Controller to provide assurance that the Data Processor is in compliance with the obligations set out in this clause thirty one (31), provided always that this requirement shall not oblige the Data Processor to provide or permit access to information concerning:</p>
+<ol type="i">
+<li><p>the Data Processors internal pricing information;</p></li>
+<li><p>information relating to other clients of the Data Processor;</p></li>
+<li><p>any Data Processor non-public external reports; or</p></li>
+<li><p>any internal audits prepared by the Data Processor’s internal audit or compliance functions. The Data Processor must immediately inform the Data Controller if, in their opinion an instruction provided by the Data Controller pursuant to this Contract infringes the GDPR or other data protection provisions.</p></li>
+</ol>
+<h4>32. ANTI BRIBERY AND CORRUPTION</h4>
+<p><strong>32.1</strong> The Customer undertakes to comply with all applicable laws, statutes, regulations, and codes relating to anti-bribery and anti-corruption including but not limited to the Bribery Act 2010 and the Foreign Corrupt Practices Act of 1977 <strong>(“Anti-Corruption Laws”)</strong> and that it shall not do, or omit to do, any act that will lead the Company being in breach of any of the Anti-Corruption Laws. The Customer shall:</p>
+<p><strong>32.1.1</strong> promptly report to the Company any request or demand for any undue financial or other advantage of any kind received by the Customer in connection with the performance of the Contract;</p>
+<p><strong>32.1.2</strong> promptly notify the Company (in writing) if a foreign public official becomes an officer or employee of the Customer or acquires a direct or indirect interest in the Customer (and the Customer warrants that it has no foreign public officials as direct or indirect owners, officers, or employees at the date of this Contract).</p>
+<p><strong>32.1.3</strong> promptly notify the Company (in writing) if they are aware of any breach of the current financial or other sanctions laid out by His Majesty’s Government against foreign states by suppliers, direct or indirect owners, officers, or employees of the Customer at the date of this Contract. Refer to www.gov.uk and www.hmtreasury.gov.uk for information on current sanctions.</p>
+<h4>33. NOTICE</h4>
+<p>Any written notification from the Customer required hereunder must be sent by first class registered delivery mail or e-mail addressed to the Company at the Company’s premises or such other address as may be notified to the Customer in writing from time to time. In the case of the Customer, it will be the address on the front of the Contract unless otherwise notified. In the absence of evidence of earlier receipt, all notices shall be deemed to have been served:-</p>
+<p>(i) if posted by first class registered delivery inland post two (2) business days after the envelope containing it was posted;</p>
+<p>(ii) if sent (with relevant fees prepaid) by a generally recognised international courier service, two (2) business days after the envelope containing it was delivered to the relevant international courier;</p>
+<p>(iii) if sent by e-mail to the Customer address, on completion of transmission.</p>
+<h4>34. WAIVER OF COMPLIANCE</h4>
+<p>Waiver by either party hereto of a breach by the other party of any of the provisions of these Terms and Conditions shall not be deemed a waiver of future compliance therewith, and such provisions shall remain in full force and effect.</p>
+<h4>35. HEADINGS</h4>
+<p>The headings in these Terms and Conditions are intended for reference only and shall not affect their construction.</p>
+<h4>36. COMPLAINTS AND APPEALS</h4>
+<p>If the Customer wishes to complain about decisions of the Company it shall do so in accordance with the Company’s complaints and appeals process which may change from time to time and are publicly available on the website and can be provided on request.</p>
+<h4>37. NO WAIVER</h4>
+<p>No failure or delay by the Company to exercise any right, power or remedy will operate as a waiver of it nor will any partial exercise preclude any further exercise of the same or some other right, power, or remedy.</p>
+<h4>38. LAW AND JURISDICTION</h4>
+<p>The Contract shall in all respects be governed by Scottish Law and shall be deemed to have been made in Scotland and the Customer and the Company agree to submit to the non-exclusive jurisdiction of the Scottish Courts to settle any disputes and to entertain any suit, action, or proceedings (a) arising out of or in connection with the Contract or (b) relating to any non-contractual obligations arising from or in connection with the Contract.</p>
+</template>
+<script>
+const LOGO="data:image/png;base64,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";
+const UKTC_ADDR="United Kingdom Testing & Certification Ltd\nCairnmuir House\nCairnmuir Road\nEast Kilbride\nG74 4GY\n\n+44 (0) 1355 433 122\ninfo@uktestcert.com\nwww.uktestcert.com";
+const VAT={S:{l:"VAT @ 20%",r:.2},Z:{l:"VAT – zero rated (export of services)",r:0},RC:{l:"VAT – reverse charge applies",r:0}};
+const SECTIONS=["Testing","Installation","Technical services","Certification"];
+const CLAR={
+ "Fire resistance":["Includes 38 No. unexposed surface thermocouples only.","Includes 1 No. electronic test report only.","Includes demolition and disposal of the specimens after test."],
+ "Smoke control":["Includes the relevant flexible supporting construction per BS EN 1363-1:2020 § 7.2.2.4.","Includes leakage measurement at pressure differentials ΔP = -25, -10, 10 and 25 Pa only.","Includes results with the threshold taped and untaped.","Includes 1 No. electronic letter report.","Includes demolition and disposal of the specimen after test."],
+ "Reaction to fire":["Includes 1 No. electronic letter report.","Includes demolition and disposal of the samples after test.","Includes conditioning of the samples in accordance with BS EN 13238.","Includes standard mounting of samples. Non-standard mounting is charged at the prevailing rate.","Excludes preparation of samples, which is charged at the prevailing rate if required."],
+ "FR classification":["Includes 1 No. electronic letter report.","Includes evaluation of up to 2 No. test reports. Additional reports are charged at the prevailing rate.","Classification reports using evidence from another test laboratory may incur an additional fee."],
+ "FR ExAp":["Includes 1 No. electronic letter report.","ExAps include review of up to 2 No. test reports (combined ExAps 4 No.)."],
+ "R2F classification":["Includes 1 No. electronic letter report.","Classification reports using evidence from another test laboratory may incur an additional fee."],
+ "R2F ExAp":["Includes 1 No. electronic letter report."]
+};
+const CLAR_GROUP=g=>g==="Fire resistance extra overs"||g==="Supporting construction"||g.startsWith("Installation")?"Fire resistance":g==="Reaction to fire extra overs"?"Reaction to fire":g==="FR classification extra overs"?"FR classification":g;
+const STANDARD=[
+ "Product sampling: UKTC can provide a product sampling service to support your testing requirements and help ensure that representative samples are selected and prepared for testing. Please contact us for further information and pricing.",
+ "Additional furnace time will incur an additional fee of £25.00 ex VAT per minute or part thereof (UKTC-PM-001 Rev 4).",
+ "The Customer shall provide a complete specification of the specimen(s) in advance of the test.",
+ "Where the mean furnace temperature and pressure conditions deviate from the required test conditions, the results will still be considered valid provided that the conditions represent a more severe exposure to the test specimen pursuant to BS EN 1363-1:2020 § 5.7 and BS 476-20:1987 § 3.4.",
+ "The Standard Terms and Conditions of Sale of United Kingdom Testing & Certification Limited (attached) apply to any services performed in relation to this Quotation. Notwithstanding any other terms and conditions referred to in any correspondence or documentation received from the Customer, neither (1) any further correspondence subsequent to this Quotation, nor (2) performance of the services, shall under any circumstance be construed as an acceptance of those terms and conditions. Acceptance of any provision other than the terms of this Quotation shall be made expressly in writing signed by the parties."
+];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const gbp=n=>"£"+(Number(n)||0).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2});
+const ukDate=iso=>{const d=new Date(iso);return d.toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",year:"numeric"})};
+const addDays=(iso,n)=>{const d=new Date(iso);d.setDate(d.getDate()+Number(n||30));return d.toISOString().slice(0,10)};
+
+let Q=null, picked=new Set(), accepted=null, fingerprint="";
+function parse(){
+  const m=location.hash.match(/q=([^&]+)/); if(!m) return null;
+  try{return JSON.parse(decodeURIComponent(m[1]))}catch(e){return null}
+}
+const lines=()=>Q.l.map((r,i)=>({i,name:r[0],qty:+r[1],list:+r[2],disc:+r[3],sec:r[4],grp:r[5],opt:!!r[6]})).map(l=>({...l,unit:Math.round(l.list*(1-l.disc/100)*100)/100}));
+function calc(){
+  const L=lines(); const core=L.filter(l=>!l.opt), ext=L.filter(l=>l.opt&&picked.has(l.i));
+  const net=[...core,...ext].reduce((s,l)=>s+l.qty*l.unit,0); const rate=(VAT[Q.vat]||VAT.S).r;
+  return {L,core,ext,net,vat:net*rate,total:net*(1+rate)};
+}
+async function sha(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+
+function render(){
+  const accept=Q.mode==="accept"; const c=calc(); const ref=`${Q.ref}-R${Q.rev}`; const validTo=addDays(Q.date,Q.valid);
+  const expired=new Date(validTo+"T23:59:59")<new Date();
+  const approvalPending=Q.ap&&Q.ap.level>0&&!Q.ap.by;
+  const showDisc=c.L.some(l=>l.disc>0);
+  const row=l=>`<tr><td class="n q">${l.qty}</td><td>${esc(l.name)}</td><td class="n">${gbp(l.list)}</td>${showDisc?`<td class="n">${l.disc?l.disc+"%":""}</td>`:""}<td class="n">${gbp(l.qty*l.unit)}</td></tr>`;
+  const head=`<tr><th class="q">Qty</th><th>Description</th><th class="n">Unit price</th>${showDisc?`<th class="n">Disc</th>`:""}<th class="n">Total net</th></tr>`;
+  let body="";
+  for(const s of SECTIONS){const ls=c.core.filter(l=>l.sec===s); if(ls.length) body+=`<h3>${s}</h3><table>${head}${ls.map(row).join("")}</table>`;}
+  const opts=c.L.filter(l=>l.opt);
+  let optHtml="";
+  if(opts.length){
+    optHtml=`<div style="break-inside:avoid"><h3>Optional extras</h3><p class="small" style="margin:0 0 1.5mm">${accept&&!accepted?"Tick any extras you would like to include. The totals update as you go.":"Not included in the total unless selected on acceptance."}</p><table class="opt"><tr>${accept?"<th style='width:8mm'></th>":""}<th class="q">Qty</th><th>Description</th><th class="n">Unit price</th><th class="n">Total net</th></tr>${opts.map(l=>`<tr>${accept?`<td><input type="checkbox" data-i="${l.i}" ${picked.has(l.i)?"checked":""} ${accepted?"disabled":""} aria-label="Include ${esc(l.name)}"></td>`:""}<td class="n q">${l.qty}</td><td>${esc(l.name)}${picked.has(l.i)?" <b>(selected)</b>":""}</td><td class="n">${gbp(l.unit)}</td><td class="n">${gbp(l.qty*l.unit)}</td></tr>`).join("")}</table></div>`;
+  }
+  const groups=[...new Set(c.L.filter(l=>!l.opt||picked.has(l.i)).map(l=>CLAR_GROUP(l.grp)))].filter(g=>CLAR[g]);
+  const clar=groups.map(g=>`<p style="margin:1.5mm 0 0"><b>${esc(g)}</b></p><ul class="cl">${CLAR[g].map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`).join("")+(Q.notes?`<p style="margin:1.5mm 0 0"><b>Quote-specific clarifications</b></p><p class="small">${esc(Q.notes).replace(/\n/g,"<br>")}</p>`:"");
+  const banner=approvalPending?`<div class="banner draft">DRAFT – discount requires approval before this quotation can be issued.</div>`
+    :expired?`<div class="banner draft">This quotation expired on ${ukDate(validTo)}. Please contact UKTC for an updated quotation.</div>`
+    :accepted?`<div class="banner ok">Accepted by ${esc(accepted.name)} (${esc(accepted.position)}) on ${accepted.at.toLocaleString("en-GB")}.</div>`:"";
+  const sigBlock=accepted
+    ?`<div class="sig"><div><label>Name</label>${esc(accepted.name)}</div><div><label>Position</label>${esc(accepted.position)}</div><div><label>Purchase order number</label>${esc(accepted.po||"–")}</div><div><label>Date and time</label>${accepted.at.toLocaleString("en-GB")}</div><div style="grid-column:1/3"><label>Signature (electronic)</label><span style="font-family:'Segoe Script','Brush Script MT',cursive;font-size:15pt">${esc(accepted.name)}</span></div></div><p class="fp">Document fingerprint (SHA-256): ${fingerprint}</p>`
+    :accept&&!approvalPending&&!expired
+    ?`<div class="form noprint"><div><label for="f-name">Full name</label><input type="text" id="f-name" autocomplete="name"></div><div><label for="f-pos">Position</label><input type="text" id="f-pos" autocomplete="organization-title"></div><div><label for="f-email">Email</label><input type="text" id="f-email" autocomplete="email"></div><div><label for="f-po">Purchase order number (if applicable)</label><input type="text" id="f-po"></div><div style="grid-column:1/3"><label><input type="checkbox" id="f-ok"> I accept this quotation on behalf of ${esc(Q.co.n||"the Customer")} and agree to the UKTC Terms and Conditions of Sale attached.</label></div><div style="grid-column:1/3"><button class="pri" id="f-go">Accept quotation (${gbp(c.total)})</button> <span id="f-err" style="color:#b3261e;margin-left:3mm"></span></div></div>`
+    :`<div class="sig"><div><label>Name</label></div><div><label>Position</label></div><div><label>Signature</label></div><div><label>Date</label></div><div style="grid-column:1/3"><label>Purchase order number</label></div></div>`;
+  const foot=`<div class="foot"><span>United Kingdom Testing and Certification is a trading style of United Kingdom Testing &amp; Certification Limited. Registered company number SC654601. ${esc(Q.matrix||"")}</span><b>Trusted to Ensure.</b></div>`;
+  document.getElementById("root").innerHTML=`
+  <div class="sheet">
+    <div class="top"><h1>Quotation</h1><img class="logo" src="${LOGO}" alt="UKTC – a SOCOTEC company"></div>
+    <div class="addr"><div><b>${esc(Q.co.n)}</b>\n${Q.co.a.map(esc).join("\n")}${Q.ct?`\n\nFAO: ${esc(Q.ct.n)}${Q.ct.j?", "+esc(Q.ct.j):""}`:""}</div><div class="r">${esc(UKTC_ADDR)}</div></div>
+    <div class="meta">
+      <span class="k">Our ref</span><span>${esc(ref)}</span><span class="k">Date</span><span>${ukDate(Q.date)}</span>
+      <span class="k">Your ref</span><span>${esc(Q.cref||"–")}</span><span class="k">Valid until</span><span>${ukDate(validTo)}</span>
+      <span class="k">Project</span><span style="grid-column:2/5">${esc(Q.project||"–")}</span>
+    </div>
+    ${banner}
+    ${body}
+    <table class="tot">
+      <tr><td class="k">Total net</td><td class="n">${gbp(c.net)}</td></tr>
+      ${c.ext.length?`<tr><td class="small">includes selected extras</td><td class="n small">${gbp(c.ext.reduce((s,l)=>s+l.qty*l.unit,0))}</td></tr>`:""}
+      <tr><td class="k">${esc((VAT[Q.vat]||VAT.S).l)}</td><td class="n">${gbp(c.vat)}</td></tr>
+      <tr class="g"><td>Total</td><td class="n">${gbp(c.total)}</td></tr>
+    </table>
+    ${Q.ap&&Q.ap.level>0&&Q.ap.by?`<p class="small" style="text-align:right">Commercial terms approved by ${esc(Q.ap.by)}</p>`:""}
+    ${optHtml}
+    <h3>Clarifications</h3>${clar||'<p class="small">None.</p>'}
+    <h3>Conditions</h3><div class="small">${STANDARD.map(x=>`<p>${esc(x)}</p>`).join("")}</div>
+    <div class="acc"><h3>Acceptance</h3><p class="small" style="margin:0">To accept this quotation, ${accept?"complete the details below":"sign and return a copy to info@uktestcert.com quoting our reference, or use the online acceptance link provided"}.</p>${sigBlock}${accepted?`<div class="ok-msg noprint">Thank you. Download a signed copy for your records, and send the acceptance to UKTC so we can book your test.</div>`:""}</div>
+    ${foot}
+  </div>
+  <div class="sheet"><div class="top"><h1 style="font-size:14pt">Terms and Conditions of Sale</h1><img class="logo" style="height:14mm" src="${LOGO}" alt=""></div><p class="small" style="margin:2mm 0 3mm">United Kingdom Testing &amp; Certification Limited – version 15.05.24</p><div class="terms">${document.getElementById("terms-src").innerHTML}</div></div>`;
+
+  const bar=document.getElementById("bar");
+  bar.innerHTML=`<b>${esc(ref)} · ${esc(Q.co.n)}</b>`+(accepted?`<button class="pri" id="b-mail">Send acceptance to UKTC</button><button id="b-pdf">Download signed copy (PDF)</button>`:`<button class="pri" id="b-pdf">Download PDF</button>`);
+  document.getElementById("b-pdf").onclick=()=>{document.title=`${ref} ${Q.co.n||""}${accepted?" – accepted":""}`.trim();window.print()};
+  const bm=document.getElementById("b-mail"); if(bm) bm.onclick=()=>{
+    const ex=c.ext.map(l=>`- ${l.qty} x ${l.name} (${gbp(l.qty*l.unit)})`).join("\n")||"- none";
+    const body=`Quotation ${ref} has been accepted online.\n\nCustomer: ${Q.co.n}\nAccepted by: ${accepted.name}, ${accepted.position} (${accepted.email})\nPO: ${accepted.po||"-"}\nDate: ${accepted.at.toLocaleString("en-GB")}\nTotal net: ${gbp(c.net)}\nTotal inc VAT: ${gbp(c.total)}\nOptional extras selected:\n${ex}\n\nHubSpot deal: ${Q.deal}\nDocument fingerprint: ${fingerprint}\n\nPlease attach the signed PDF.`;
+    location.href=`mailto:info@uktestcert.com?subject=${encodeURIComponent("Quotation accepted – "+ref)}&body=${encodeURIComponent(body)}`;
+  };
+  document.querySelectorAll(".opt input[type=checkbox]").forEach(cb=>cb.onchange=()=>{const i=+cb.dataset.i;cb.checked?picked.add(i):picked.delete(i);keepForm(render)});
+  const go=document.getElementById("f-go"); if(go) go.onclick=async()=>{
+    const v=id=>document.getElementById(id).value.trim(); const err=document.getElementById("f-err");
+    if(!v("f-name")||!v("f-pos")||!/^\S+@\S+\.\S+$/.test(v("f-email"))){err.textContent="Enter your name, position and a valid email.";return}
+    if(!document.getElementById("f-ok").checked){err.textContent="Tick the box to accept the terms.";return}
+    const c2=calc();
+    accepted={name:v("f-name"),position:v("f-pos"),email:v("f-email"),po:v("f-po"),at:new Date()};
+    fingerprint=await sha(JSON.stringify({q:Q,extras:[...picked],accepted:{...accepted,at:accepted.at.toISOString()},total:c2.total.toFixed(2)}));
+    render(); window.scrollTo(0,0);
+  };
+}
+function keepForm(fn){const ids=["f-name","f-pos","f-email","f-po"];const vals={};ids.forEach(i=>{const e=document.getElementById(i);if(e)vals[i]=e.value});const ok=document.getElementById("f-ok")?.checked;fn();ids.forEach(i=>{const e=document.getElementById(i);if(e&&vals[i])e.value=vals[i]});const o=document.getElementById("f-ok");if(o&&ok)o.checked=true;}
+
+Q=parse();
+if(!Q){document.getElementById("root").innerHTML=`<div class="err"><img src="${LOGO}" style="height:18mm" alt="UKTC"><h2>Quotation link incomplete</h2><p>This page shows UKTC quotations from a link generated in HubSpot. The link you opened doesn't contain a quotation. Please contact <a href="mailto:info@uktestcert.com">info@uktestcert.com</a>.</p></div>`;}
+else render();
+window.addEventListener("hashchange",()=>{Q=parse();picked=new Set();accepted=null;if(Q)render()});
+</script>
+</body>
+</html>
