@@ -446,7 +446,7 @@ function render(){
   </div>
   <div class="sheet"><div class="top"><h1 style="font-size:14pt">Terms and Conditions of Sale</h1><img class="logo" style="height:14mm" src="${LOGO}" alt=""></div><p class="small" style="margin:2mm 0 3mm">United Kingdom Testing &amp; Certification Limited – version 15.05.24</p><div class="terms">${document.getElementById("terms-src").innerHTML}</div></div>`;
 
-  const bar=document.getElementById("bar");
+  const bar=document.getElementById("bar"); if(/pv=/.test(location.hash)){bar.style.display="none";document.body.style.background="#fff";}
   bar.innerHTML=`<b>${esc(ref)} · ${esc(Q.co.n)}</b>`+(accepted?`<button class="pri" id="b-mail">Send acceptance to UKTC</button><button id="b-pdf">Download signed copy (PDF)</button>`:`<button class="pri" id="b-pdf">Download PDF</button>`);
   document.getElementById("b-pdf").onclick=()=>{document.title=`${ref} ${Q.co.n||""}${accepted?" – accepted":""}`.trim();window.print()};
   const bm=document.getElementById("b-mail"); if(bm) bm.onclick=()=>{
