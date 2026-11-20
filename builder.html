@@ -127,6 +127,7 @@ details summary{cursor:pointer;font-size:12px;color:var(--mut)}
         <div class="band l0" id="band"></div>
         <div class="acts">
           <span class="msg" id="actmsg"></span>
+          <button id="b-save" style="display:none" title="Write line items, amount and quote fields to the HubSpot deal">Save to deal</button>
           <button id="b-acc">Customer acceptance link</button>
           <button class="pri" id="b-open">Open quote / download PDF</button>
         </div>
@@ -141,6 +142,12 @@ const QUOTE_PAGE=new URL('./',location.href).href;
 const VATR={S:.2,Z:0,RC:0}, VATL={S:"VAT @ 20%",Z:"VAT (zero rated)",RC:"VAT (reverse charge)"};
 const SEC_ORDER=["Testing","Installation","Technical services","Certification"];
 const APPROVERS=[["Mark Garfield","Sales Director",1],["Andrew Hutchison","Operations Director",2]];
+const TEMPLATES_SKU={
+ doorset:[["FR-V33-NLB-060-1634",2,0],["FR-SC-EI60-33",2,0],["FR-IV-DSADD",2,0],["SM-TEST",2,0],["TS-CL-DOOR",1,0],["TS-EXAP-TIMBER",1,0],["FR-XO-HARDCOPY",1,1],["FR-XO-WEEKEND",1,1]],
+ partition:[["FR-V33-NLB-060-13641",1,0],["FR-IV-WB1-33",1,0],["TS-CL-PART",1,0],["FR-XO-MIRROR",1,1],["FR-XO-FT-WUNL",30,1]],
+ r2f:[["R2F-SBI",1,0],["R2F-11925",1,0],["TS-CL-R2F",1,0],["R2F-XO-MOUNT",1,1]],
+ ensure:[["CERT-ENS-APP",1,0],["CERT-ENS-SUB",1,0],["CERT-FPC-DAY",1,0],["CERT-ENS-TR10",1,0],["CERT-ENS-TS-DOM",1,0]]
+};
 const TEMPLATES=[
  ["doorset","EN 1634-1 timber doorset test + smoke + EXAP",[["Fire resistance","vertical 3x3, non-loadbearing, 60 min",2,0],["Supporting construction","EI60 Flexible construction as per BS EN 1363-1:2020 § 7.2.2.4 – 3x3",2,0],["Installation – vertical","single acting double door",2,0],["Smoke control","Smoke leakage test pursuant",2,0],["FR classification","Fire Doorsets",1,0],["FR ExAp","15269-3",1,0],["Fire resistance extra overs","Signed hard copies",1,1],["Fire resistance extra overs","Weekend test fee",1,1]]],
  ["partition","Partition test 3x3 (EN 1364-1) + classification",[["Fire resistance","vertical 3x3, non-loadbearing, 60 min",1,0],["Installation – vertical","single layer wallboard",1,0],["FR classification","Partitions",1,0],["Fire resistance extra overs","Mirror Report",1,1],["Fire resistance extra overs","Additional furnace time - Unloaded wall",30,1]]],
@@ -157,16 +164,27 @@ function parseHash(){const q=new URLSearchParams(location.search).get("d");if(q)
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const b64u=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");return b64(s+"=".repeat((4-s.length%4)%4))};
 async function loadCat(k){const e=await (await fetch("catalogue.enc.json",{cache:"no-store"})).json();const key=await crypto.subtle.importKey("raw",b64u(k),"AES-GCM",false,["decrypt"]);const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(e.iv)},key,b64(e.ct));return JSON.parse(new TextDecoder().decode(pt))}
+async function api(path,opts={}){
+  const r=await fetch(C.api+path,{...opts,headers:{"Authorization":"Bearer "+C.t,...(opts.body?{"content-type":"application/json"}:{})}});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||("HTTP "+r.status));return j;
+}
+async function loadProducts(){
+  const list=await api("/products");
+  const conames=(C.co||[]).map(c=>String(c.n||"").toLowerCase()).join(" | ");
+  return list.filter(p=>!p.cs||conames.includes(String(p.n).split(/\s+/)[0].toLowerCase()))
+    .map(p=>({id:p.id,pid:p.id,sku:p.sku,sec:p.cs?"Testing":p.sec,g:p.cs?"Customer-specific":p.g,n:p.n,p:p.p,x:!!p.x,poa:p.p===null}))
+    .sort((a,b)=>((a.sku?0:1)-(b.sku?0:1))||(SEC_ORDER.indexOf(a.sec)-SEC_ORDER.indexOf(b.sec))||String(a.sku).localeCompare(String(b.sku)));
+}
 function fresh(){
   const co0=(C.co&&C.co[0])||{};
   const uk=!co0.c||/^(united kingdom|uk|gb|great britain|england|scotland|wales|northern ireland)$/i.test(String(co0.c).trim());
-  return {co:0,ct:"",vat:uk?"S":"Z",cref:"",rev:1,valid:30,proj:C.deal?.n||"",notes:"",ap:"",lines:[]};
+  return {co:0,ct:"",vat:uk?"S":"Z",cref:"",rev:Math.max(1,Number(C.rev)||1),valid:30,proj:C.deal?.n||"",notes:"",ap:"",lines:[]};
 }
 function save(){try{localStorage.setItem(key,JSON.stringify(S));$("saved").textContent="Draft saved "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}catch(e){$("saved").textContent=""}}
 function load(){try{const s=JSON.parse(localStorage.getItem(key)||"null");if(s&&Array.isArray(s.lines))return s}catch(e){}return null}
 
 function initCat(){
-  CAT=(C.cat||[]).map(([id,sec,g,n,p,x])=>({id,sec,g,n,p,x:!!x,poa:p===null}));
+  if(!C.live)CAT=(C.cat||[]).map(([id,sec,g,n,p,x])=>({id,sec,g,n,p,x:!!x,poa:p===null}));
   const groups=[...new Set(CAT.map(i=>i.g))];
   $("chips").innerHTML=['<span class="chip on" data-g="">All</span>',...groups.map(g=>`<span class="chip" data-g="${esc(g)}">${esc(g)}</span>`)].join("");
   $("chips").onclick=e=>{const c=e.target.closest(".chip");if(!c)return;grp=c.dataset.g;[...$("chips").children].forEach(x=>x.classList.toggle("on",x===c));renderCat()};
@@ -177,12 +195,13 @@ function initCat(){
 }
 function renderCat(){
   const words=$("q").value.toLowerCase().split(/\s+/).filter(Boolean);
-  const list=CAT.filter(i=>(!grp||i.g===grp)&&words.every(w=>(i.n+" "+i.g).toLowerCase().includes(w)));
+  const list=CAT.filter(i=>(!grp||i.g===grp)&&words.every(w=>(i.n+" "+i.g+" "+(i.sku||"")).toLowerCase().includes(w)));
   $("cat").innerHTML=list.map(i=>`<div class="ci" data-id="${i.id}" title="Click to add"><div class="nm">${esc(i.n)}<div class="gp">${esc(i.g)}${i.x?" · extra over":""}</div></div><div class="pr">${i.poa?"POA":gbp(i.p)}</div><div class="add">+</div></div>`).join("")||'<div class="empty">No matches</div>';
 }
-function lineFrom(it,qty=1,opt=null){return {k:Math.random().toString(36).slice(2,9),id:it.id,n:it.n,sec:it.sec,g:it.g,q:qty,list:it.poa?0:it.p,price:it.poa?0:it.p,poa:it.poa,d:0,o:opt===null?it.x:!!opt}}
+function lineFrom(it,qty=1,opt=null){return {k:Math.random().toString(36).slice(2,9),id:it.id,pid:it.pid||"",sku:it.sku||"",n:it.n,sec:it.sec,g:it.g,q:qty,list:it.poa?0:it.p,price:it.poa?0:it.p,poa:it.poa,d:0,o:opt===null?it.x:!!opt}}
 function addItem(id){const it=CAT.find(i=>i.id===id);if(!it)return;S.lines.push(lineFrom(it));renderRows(it.poa?S.lines.at(-1).k:null);changed()}
 function applyTemplate(k){
+  if(C.live&&TEMPLATES_SKU[k]){for(const [sku,q,o] of TEMPLATES_SKU[k]){const it=CAT.find(i=>i.sku===sku);if(it)S.lines.push(lineFrom(it,q,o))}if(!S.proj&&C.deal?.n)S.proj=C.deal.n;renderRows();changed();return}
   const t=TEMPLATES.find(t=>t[0]===k);if(!t)return;
   for(const [g,txt,q,o] of t[2]){const it=CAT.find(i=>i.g===g&&i.n.toLowerCase().includes(txt.toLowerCase()));if(it)S.lines.push(lineFrom(it,q,o))}
   if(!S.proj&&C.deal?.n)S.proj=C.deal.n;
@@ -244,13 +263,29 @@ function payload(mode){
   const co=(C.co||[])[S.co]||{};const ct=(C.ct||[]).find(c=>String(c.id)===String(S.ct));
   const t=totals();const lvl=band(t.pct);
   const ord=[...S.lines];
-  const q={v:1,ref:`UKTC-Q-${C.deal?.id||"0"}-${C.ymd||""}`,rev:S.rev,date:new Date().toISOString().slice(0,10),valid:S.valid,vat:S.vat,matrix:C.matrix||"",
+  const q={v:1,ref:refBase(),rev:S.rev,date:new Date().toISOString().slice(0,10),valid:S.valid,vat:S.vat,matrix:C.matrix||"",
     deal:C.deal?.id,project:S.proj,cref:S.cref,notes:S.notes,
     co:{n:co.n||"",a:(co.a||[]).filter(Boolean)},ct:ct?{n:ct.n,e:ct.e||"",j:ct.j||""}:null,
     ap:{level:lvl,by:lvl?S.ap:""},
     l:ord.map(l=>[l.n,l.q,l.price||0,l.d||0,l.sec,l.g,l.o?1:0])};
   if(mode)q.mode=mode;
   return QUOTE_PAGE+"#q="+encodeURIComponent(JSON.stringify(q));
+}
+const refBase=()=>C.ref||`UKTC-Q-${C.deal?.id||"0"}-${C.ymd||""}`;
+const LEVEL_TXT=["","Sales Director","Operations Director"];
+const STATUS_TXT={ready_to_send:"Ready to send",awaiting_approval:"Awaiting discount approval",approved:"Approved",sent:"Sent to customer",accepted:"Accepted",declined:"Declined"};
+async function saveToDeal(){
+  const t=totals();const lvl=band(t.pct);const b=$("b-save");
+  const vu=new Date(Date.now()+S.valid*864e5).toISOString().slice(0,10);
+  const body={quote:{ref:refBase(),rev:S.rev,level:lvl,approver:lvl?S.ap:"",total:r2(t.tot),vat:r2(t.vat),opt:r2(t.opt),pct:r2(t.pct),vatT:S.vat,validUntil:vu,link:payload()},
+    lines:S.lines.map(l=>({pid:l.pid||"",sku:l.sku||"",n:l.n,q:l.q,price:l.price||0,d:l.d||0,o:!!l.o}))};
+  b.disabled=true;b.textContent="Saving…";
+  try{const r=await api("/deal/save",{method:"POST",body:JSON.stringify(body)});
+    C.ref=refBase();
+    $("actmsg").textContent=`Saved to deal: ${r.lineItems} line item(s), ${gbp(r.amount)} net – ${STATUS_TXT[r.status]||r.status}${r.status==="awaiting_approval"?` (needs ${LEVEL_TXT[lvl]})`:""}.`;
+    $("saved").textContent="Saved to HubSpot "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){$("actmsg").textContent="Save failed: "+e.message}
+  b.textContent="Save to deal";b.disabled=false;
 }
 let pvT=null;
 function changed(light){
@@ -266,7 +301,8 @@ function changed(light){
   const poa=S.lines.filter(l=>l.poa&&!l.price).length;
   const reason=!S.lines.length?"Add lines to create a quote.":poa?`${poa} POA line(s) need a price.`:(lvl&&!S.ap)?"Record the approver first.":"";
   $("b-open").disabled=$("b-acc").disabled=!!reason;$("actmsg").textContent=reason;
-  $("h-ref").textContent=`UKTC-Q-${C.deal?.id||"0"}-${C.ymd||""}-R${S.rev}`;
+  if(C.live){$("b-save").style.display="";$("b-save").disabled=!S.lines.length||!!poa}
+  $("h-ref").textContent=`${refBase()}-R${S.rev}`;
   save();
   clearTimeout(pvT);pvT=setTimeout(()=>{if(!$("main").classList.contains("nopv"))$("pvframe").src=payload()+"&pv="+Date.now()},light?600:150);
 }
@@ -282,6 +318,7 @@ function bindMeta(){
   $("b-new").onclick=()=>{if(!S.lines.length||confirmClear()){S.lines=[];renderRows();changed()}};
   $("b-pv").onclick=()=>{$("main").classList.toggle("nopv");changed()};
   $("b-open").onclick=()=>window.open(payload(),"_blank","noopener");
+  $("b-save").onclick=saveToDeal;
   $("b-acc").onclick=()=>{$("linkbox").style.display="flex";$("acclink").value=payload("accept");$("acclink").select()};
   $("b-copy").onclick=async()=>{const i=$("acclink");i.select();try{await navigator.clipboard.writeText(i.value);$("b-copy").textContent="Copied"}catch(e){document.execCommand&&document.execCommand("copy");$("b-copy").textContent="Copied"}setTimeout(()=>$("b-copy").textContent="Copy link",1500)};
 }
@@ -292,12 +329,13 @@ window.addEventListener("resize",fitPreview);
 
 (async()=>{
 C=parseHash();
-if(C&&!C.cat&&C.k){try{C.cat=await loadCat(C.k)}catch(e){console.error(e);C=null}}
+if(C&&C.api&&C.t){try{CAT=await loadProducts();C.live=CAT.length>0}catch(e){console.error("Product Library unavailable",e)}}
+if(C&&!C.live&&!C.cat&&C.k){try{C.cat=await loadCat(C.k)}catch(e){console.error(e);C=null}}
 if(!C){document.body.innerHTML=`<div class="empty" style="margin-top:60px"><img src="data:image/png;base64,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" style="height:50px" alt="UKTC"><h2>Open the quote builder from a HubSpot deal</h2><p>This page needs the deal and price list passed from the UKTC quote card in HubSpot.</p></div>`;}
 else{
   key="uktcq_"+(C.deal?.id||"0");
   S=load()||fresh();
-  $("h-sub").textContent=[C.deal?.n,C.matrix].filter(Boolean).join(" · ");
+  $("h-sub").textContent=[C.deal?.n,C.live?"HubSpot Product Library":C.matrix+" (offline price list)"].filter(Boolean).join(" · ");
   initCat();bindMeta();if(S.notes)$("notesbox").open=true;renderRows();changed();fitPreview();
 }
 })();
