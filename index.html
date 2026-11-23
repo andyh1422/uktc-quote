@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>UKTC Quotation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="cover-img.js"></script>
 <style>
 :root{--red:#E50914;--ink:#1d1d1b;--mut:#5f5f5f;--line:#d9d9d9;--soft:#f6f6f6}
 *{box-sizing:border-box}
@@ -67,11 +69,38 @@ tr.po td{color:#555;font-style:italic}
 .pay{margin-top:3mm;font-size:9pt}
 .fp{font-family:Consolas,monospace;font-size:7.5pt;color:var(--mut);word-break:break-all}
 @page{size:A4;margin:12mm 14mm 14mm}
+@page cover{size:A4;margin:0}
+.cover{padding:0!important;height:297mm;overflow:hidden;font-family:Poppins,"Segoe UI",Arial,sans-serif;color:#001C3B;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cover *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cover .dm{position:absolute;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background-size:cover;background-position:center;background-color:#2a2a2a}
+.cover .d1{left:132mm;top:-22mm;width:88mm;height:88mm}
+.cover .d2{left:86mm;top:24mm;width:88mm;height:88mm}
+.cover .d3{left:132mm;top:70mm;width:88mm;height:88mm}
+.cover .d4{left:178mm;top:24mm;width:88mm;height:88mm;background:var(--red)}
+.cover .d5{left:72mm;top:100mm;width:24mm;height:24mm;background:var(--red)}
+.cover .clogo{position:absolute;left:18mm;top:20mm;height:27mm}
+.cover .cbody{position:absolute;left:18mm;right:18mm;top:146mm}
+.cover .ct{font-family:Poppins,"Segoe UI",Arial,sans-serif;font-weight:300;font-size:38pt;margin:0;letter-spacing:-.5px;color:#001C3B}
+.cover .cs{font-size:12.5pt;line-height:1.45;margin:3mm 0 7mm;max-width:160mm;color:#001C3B}
+.cover .cmeta{border-collapse:collapse;width:auto}
+.cover .cmeta td{border:none;padding:1.3mm 0;font-size:9pt;vertical-align:top;color:#001C3B}
+.cover .cmeta td.k{width:34mm;font-weight:500;color:var(--red)}
+.cover .cby{margin-top:8mm;display:flex;gap:4.5mm;align-items:center}
+.cover .cav{width:19mm;height:19mm;border-radius:50%;object-fit:cover;border:.8mm solid var(--red);background:#fff}
+.cover .cini{width:19mm;height:19mm;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15pt}
+.cover .cbyk{font-size:7.5pt;text-transform:uppercase;letter-spacing:.8px;color:var(--red);font-weight:600}
+.cover .cbyn{font-size:11.5pt;font-weight:600;line-height:1.25}
+.cover .cbyd{font-size:8.6pt;line-height:1.45;color:#313343}
+.cover .cfoot{position:absolute;left:18mm;right:18mm;bottom:15mm;display:flex;justify-content:space-between;align-items:flex-end}
+.cover .cad{font-size:7.2pt;line-height:1.45;color:#313343}
+.cover .ctag{font-size:17pt;font-weight:400;color:#001C3B}
+.cover .cbar{position:absolute;left:0;right:0;bottom:0;height:7mm;background:var(--red)}
 @media print{
  body{background:#fff}
  .bar,.noprint{display:none!important}
  .sheet{margin:0;box-shadow:none;page-break-after:always;min-height:0;padding:0;width:auto}
  .foot{position:static;margin-top:6mm}
+ .sheet.cover{page:cover;width:210mm;height:297mm;padding:0!important;position:relative}
  h3{break-after:avoid}
  .sheet:last-child{page-break-after:auto}
  .acc{break-inside:avoid}
@@ -436,7 +465,24 @@ function render(){
     ?`<div class="form noprint"><div><label for="f-name">Full name</label><input type="text" id="f-name" autocomplete="name"></div><div><label for="f-pos">Position</label><input type="text" id="f-pos" autocomplete="organization-title"></div><div><label for="f-email">Email</label><input type="text" id="f-email" autocomplete="email"></div><div><label for="f-po">Purchase order number (if applicable)</label><input type="text" id="f-po"></div><div style="grid-column:1/3"><label><input type="checkbox" id="f-ok"> I accept this quotation on behalf of ${esc(Q.co.n||"the Customer")} and agree to the UKTC Terms and Conditions of Sale attached.</label></div><div style="grid-column:1/3"><button class="pri" id="f-go">Accept quotation (${gbp(c.total)})</button> <span id="f-err" style="color:#b3261e;margin-left:3mm"></span></div></div>`
     :`<div class="sig"><div><label>Name</label></div><div><label>Position</label></div><div><label>Signature</label></div><div><label>Date</label></div><div style="grid-column:1/3"><label>Purchase order number</label></div></div>`;
   const foot=`<div class="foot"><span>United Kingdom Testing and Certification is a trading style of United Kingdom Testing &amp; Certification Limited. Registered company number SC654601. ${esc(Q.matrix||"")}</span><b>Trusted to Ensure.</b></div>`;
-  document.getElementById("root").innerHTML=`
+  const CI=window.UKTC_COVER||{};const by=Q.by||null;
+  const prefs=[...new Set((Q.pk||[]).map(p=>p[2]).filter(Boolean))];
+  const ini=n=>String(n||"").split(/\s+/).filter(Boolean).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+  const dm=(c,k)=>`<div class="dm ${c}"${k&&CI[k]?` style="background-image:url('${CI[k]}')"`:""}></div>`;
+  const cover=`<div class="sheet cover">${dm("d1","fire")}${dm("d2","tech")}${dm("d3","rig")}${dm("d4")}${dm("d5")}
+    <img class="clogo" src="${LOGO}" alt="UKTC – a SOCOTEC company">
+    <div class="cbody"><h1 class="ct">Quotation</h1>${Q.project?`<p class="cs">${esc(Q.project)}</p>`:'<p class="cs"></p>'}
+      <table class="cmeta">
+        <tr><td class="k">Quote ref</td><td>${esc(ref)}</td></tr>
+        ${prefs.length?`<tr><td class="k">Project ref${prefs.length>1?"s":""}</td><td>${prefs.map(esc).join("<br>")}</td></tr>`:""}
+        <tr><td class="k">Issue date</td><td>${ukDate(Q.date)}</td></tr>
+        <tr><td class="k">Valid until</td><td>${ukDate(validTo)}</td></tr>
+        <tr><td class="k">Prepared for</td><td><b>${esc(Q.co.n||"")}</b>${Q.co.a.length?"<br>"+Q.co.a.map(esc).join("<br>"):""}${Q.ct?`<br>FAO ${esc(Q.ct.n)}`:""}</td></tr>
+      </table>
+    ${by?`<div class="cby">${by.a?`<img class="cav" src="${by.a}" alt="">`:`<div class="cini">${esc(ini(by.n))}</div>`}<div><div class="cbyk">Your contact</div><div class="cbyn">${esc(by.n)}</div><div class="cbyd">${by.t?esc(by.t)+"<br>":""}${by.e?esc(by.e)+"<br>":""}${by.p?"T: "+esc(by.p):""}</div></div></div>`:""}</div>
+    <div class="cfoot"><div class="cad">Cairnmuir House, Cairnmuir Road,<br>East Kilbride, Glasgow G74 4GY<br>+44 (0)1355 433 122<br>info@uktestcert.com<br>uktestcert.com<br>Approved Body No: 8526</div><div class="ctag">Trusted to ensure.</div></div>
+    <div class="cbar"></div></div>`;
+  document.getElementById("root").innerHTML=`${cover}
   <div class="sheet">
     <div class="top"><h1>Quotation</h1><img class="logo" src="${LOGO}" alt="UKTC – a SOCOTEC company"></div>
     <div class="addr"><div><b>${esc(Q.co.n)}</b>\n${Q.co.a.map(esc).join("\n")}${Q.ct?`\n\nFAO: ${esc(Q.ct.n)}${Q.ct.j?", "+esc(Q.ct.j):""}`:""}</div><div class="r">${esc(UKTC_ADDR)}</div></div>
