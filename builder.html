@@ -25,7 +25,8 @@ header .ref{font-weight:600}
 header .sp{margin-left:auto;display:flex;gap:8px;align-items:center}
 .meta{display:grid;grid-template-columns:2fr 2fr 2fr 1.4fr 0.7fr 0.7fr;gap:8px 10px;padding:8px 14px;border-bottom:1px solid var(--line);background:#fcfcfc}
 .meta .pj,.meta .tp{grid-column:span 3}
-main{flex:1;display:grid;grid-template-columns:270px minmax(0,1fr) 380px;min-height:0}
+main{flex:1;display:grid;grid-template-columns:270px minmax(0,1fr);min-height:0}
+#pv,#b-pv{display:none!important}
 main.nopv{grid-template-columns:270px minmax(0,1fr) 0}
 main.nopv #pv{display:none}
 aside{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
@@ -59,9 +60,13 @@ tr.pkh{cursor:pointer}
 .pkrow input[type=text]{width:auto}
 .pkt{font-weight:600;min-width:200px;flex:1}
 .pkref{width:140px!important;font-family:Consolas,monospace}
-.pkstd{width:170px!important}
+.pkstd{width:190px!important}
 .pkdate{width:135px!important}
 .pkadd select{width:auto;max-width:240px;font-size:12px;padding:3px 5px}
+.pkadd button{font-size:12px;padding:4px 10px}
+.gtool{display:flex;gap:10px;align-items:center;padding:8px 2px}
+tr.ibo td{color:#555;font-style:italic;background:#fafafa}
+.ibo-tag{font-style:normal;font-size:10.5px;padding:1px 6px;border-radius:8px;background:#eef;color:#334;margin-left:6px}
 .pkn{font-weight:700;color:var(--red);white-space:nowrap}
 tr.inpk td:first-child{padding-left:16px}
 .tag{font-size:10px;padding:1px 6px;border-radius:8px;margin-left:4px;white-space:nowrap}
@@ -119,7 +124,7 @@ details summary{cursor:pointer;font-size:12px;color:var(--mut)}
 .tg.t{background:#fde8e9;color:var(--red)}
 .plft{display:flex;justify-content:space-between;gap:10px;padding:9px 16px;border-top:1px solid var(--line);font-size:12.5px}
 #plmsg{color:var(--ok);font-weight:600}
-@media (max-width:1150px){main{grid-template-columns:240px minmax(0,1fr) 0}#pv{display:none}.meta{grid-template-columns:repeat(4,1fr)}.meta .pj,.meta .tp{grid-column:span 2}#chips{max-height:76px;overflow:auto}}
+@media (max-width:1150px){main{grid-template-columns:240px minmax(0,1fr)}#pv{display:none}.meta{grid-template-columns:repeat(4,1fr)}.meta .pj,.meta .tp{grid-column:span 2}#chips{max-height:76px;overflow:auto}}
 @media (max-width:900px){html,body{height:auto}body{display:block}main{display:block!important}aside{border-right:0;border-bottom:1px solid var(--line)}#cat{max-height:190px}#chips{max-height:52px;overflow:auto}#gridwrap{overflow:visible;padding:0 8px}#pv{display:none!important}.meta{grid-template-columns:1fr 1fr}.meta .pj,.meta .tp{grid-column:span 2}td input[type=number]{min-width:54px}.q{width:62px}}
 </style>
 </head>
@@ -153,7 +158,7 @@ details summary{cursor:pointer;font-size:12px;color:var(--mut)}
     <div id="cat"></div>
   </aside>
   <section id="mid">
-    <div id="gridwrap"><table><thead><tr><th>Description</th><th class="n q">Qty</th><th class="n pc">Unit £</th><th class="n dc">Disc %</th><th class="n lc">Line £</th><th class="oc">Optional</th><th class="xc"></th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty">Pick a template above, or click a test in the price list to start a test package. Other items go into the highlighted test, or the quote if no test is highlighted.</div></div>
+    <div id="gridwrap"><div class="gtool"><button id="b-addtest" class="pri">+ Add test</button><span class="kbd">Creates a test package, then opens the price list so you can pick its services.</span></div><table><thead><tr><th>Description</th><th class="n q">Qty</th><th class="n pc">Unit £</th><th class="n dc">Disc %</th><th class="n lc">Line £</th><th class="oc">Optional</th><th class="xc"></th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty">Pick a template above, or click a test in the price list to start a test package. Other items go into the highlighted test, or the quote if no test is highlighted.</div></div>
     <footer>
       <div class="tots">
         <div class="t"><span>List value</span><b id="t-list">£0.00</b></div>
@@ -252,6 +257,7 @@ const isTest=it=>TEST_G.has(it.g)&&!it.x&&!/^SM-(SC|ADD)|^R2F-XO/.test(it.sku||"
 const PKG_OK=it=>/^(FR-(SC|IV|IH|XO)|SM-|R2F-XO)/.test(it.sku||"")||/Installation|Supporting construction|extra overs/i.test(it.g||"");
 const STD_RX=/\b(BS\s(?:EN\s)?(?:ISO\s)?\d+(?:-\d+)*(?:\.\d+)?(?:\+A\d)?(?::\d{4})?)/;
 const stdOf=n=>{const m=String(n).match(STD_RX);return m?m[1]:""};
+function stdPick(n){const raw=stdOf(n);if(!raw||!C.std)return raw;const k=x=>String(x).replace(/\+\s*A\d+/i,"").toUpperCase().replace(/[^A-Z0-9.-]/g,"");const r=k(raw);const hit=C.std.find(o=>k(o[0]).startsWith(r));return hit?hit[0]:raw}
 function ukRef(d){const f=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(d);const g=t=>f.find(x=>x.type===t).value;return `${g("year")}${g("month")}${g("day")}-${g("second")}${g("minute")}${g("hour")}`}
 function newRef(){const used=new Set(S.pk.map(p=>p.ref));const dm=String(C.deal?.n||"").match(/^(\d{8}-\d{6}[A-Z]?)/);if(dm&&!used.has(dm[1]))return dm[1];let t=Date.now(),r=ukRef(new Date(t));while(used.has(r)){t+=1000;r=ukRef(new Date(t))}return r}
 function boltOns(test){const s=test&&test.sku||"";const f=rx=>CAT.filter(i=>rx.test(i.sku||""));
@@ -262,11 +268,16 @@ function boltOns(test){const s=test&&test.sku||"";const f=rx=>CAT.filter(i=>rx.t
   if(/^R2F-/.test(s))return {sc:[],inst:[],xo:f(/^R2F-XO-/)};
   return {sc:[],inst:[],xo:[]}}
 function autoSampling(){if(S.samp||!C.live)return;const it=CAT.find(i=>i.sku==="SAMP-DAY");if(it){S.lines.push(lineFrom(it,1,true));S.samp=true}}
-function addPackage(it,q=1,extra=[]){const id="p"+Math.random().toString(36).slice(2,8);S.pk.push({id,title:it.n,ref:newRef(),std:stdOf(it.n),date:""});S.active=id;
+function addPackage(it,q=1,extra=[]){const id="p"+Math.random().toString(36).slice(2,8);S.pk.push({id,title:it.n,ref:newRef(),std:stdPick(it.n),date:"",ibo:false});S.active=id;
   const l=lineFrom(it,q,false);l.p=id;S.lines.push(l);
   for(const [sku,qq,o] of extra){const b=CAT.find(i=>i.sku===sku);if(b){const x=lineFrom(b,qq,!!o);x.p=id;S.lines.push(x)}}
   autoSampling();return id}
-function addItem(id){const it=CAT.find(i=>i.id===id);if(!it)return;
+const IBO_TXT='Installation by others – the test specimen is to be installed by the client or their contractor.';
+const isDefTitle=t=>!t||/^(Test \d+|New test)$/i.test(t.trim());
+function addEmptyTest(){const id="p"+Math.random().toString(36).slice(2,8);S.pk.push({id,title:"Test "+(S.pk.length+1),ref:newRef(),std:"",date:"",ibo:false});S.active=id;renderRows();changed();return id}
+function addItem(id,force){const it=CAT.find(i=>String(i.id)===String(id));if(!it)return;
+  const tp=force?S.pk.find(p=>p.id===S.active):null;
+  if(tp){const l=lineFrom(it,1,isTest(it)?false:null);l.p=tp.id;S.lines.push(l);if(isTest(it)&&isDefTitle(tp.title)){tp.title=it.n;if(!tp.std)tp.std=stdPick(it.n)}autoSampling();renderRows(it.poa?l.k:null);changed();return}
   if(isTest(it)){addPackage(it);renderRows(it.poa?S.lines.find(l=>l.p===S.active).k:null);changed();return}
   const l=lineFrom(it);const ap=S.pk.find(p=>p.id===S.active);if(ap&&PKG_OK(it))l.p=ap.id;S.lines.push(l);renderRows(it.poa?l.k:null);changed()}
 function applyTemplate(k){
@@ -307,16 +318,16 @@ function pkHead(p,n){
   return `<tr class="pkh${S.active===p.id?" act":""}" data-pk="${p.id}"><td colspan="7">
     <div class="pkrow"><span class="pkn">Test ${n}</span><input type="text" class="pkt" data-pf="title" value="${esc(p.title)}" aria-label="Test title">
     <span class="kbd">Project ref</span><input type="text" class="pkref" data-pf="ref" value="${esc(p.ref)}" aria-label="Project reference">
-    <span class="kbd">Standard</span><input type="text" class="pkstd" data-pf="std" value="${esc(p.std)}" aria-label="Standard">
+    <span class="kbd">Standard</span>${C.std?`<select class="pkstd" data-pf="std" aria-label="Standard"><option value="">Choose standard</option>${(C.std.some(o=>o[0]===p.std)||!p.std?C.std:[[p.std,p.std+" (not in HubSpot list)"],...C.std]).map(o=>`<option value="${esc(o[0])}" ${o[0]===p.std?"selected":""}>${esc(o[1])}</option>`).join("")}</select>`:`<input type="text" class="pkstd" data-pf="std" value="${esc(p.std)}" aria-label="Standard">`}
     <span class="kbd">Test date</span><input type="date" class="pkdate" data-pf="date" value="${isDate(p.date)?p.date:""}" ${isDate(p.date)?"":"disabled"} aria-label="Test date">
     <label class="kbd"><input type="checkbox" data-pf="tbc" ${isDate(p.date)?"":"checked"}> TBC</label>
     <button class="ib" data-pa="delpk" title="Remove this test and its lines">✕</button></div>
-    <div class="pkrow pkadd" style="margin-top:4px">${sel("sc","Supporting construction",bo.sc)}${sel("inst","Installation",bo.inst)}${sel("xo","Extra",bo.xo)}<span class="kbd" style="margin-left:auto">Package ${gbp(sub)}</span></div></td></tr>`;
+    <div class="pkrow pkadd" style="margin-top:4px"><button data-pa="edit" title="Open the price list to add services to this test">Edit services</button><label class="kbd"><input type="checkbox" data-pf="ibo" ${p.ibo?"checked":""}> Installation by others</label>${ls.length?"":'<span class="kbd" style="color:var(--bad)">No services yet</span>'}<span class="kbd" style="margin-left:auto">Package ${gbp(sub)}</span></div></td></tr>`;
 }
 function renderRows(focusKey){
   const rows=[];
   const ids=new Set(S.pk.map(p=>p.id));
-  S.pk.forEach((p,i)=>{rows.push(pkHead(p,i+1));for(const l of S.lines.filter(l=>l.p===p.id))rows.push(rowHtml(l,true))});
+  S.pk.forEach((p,i)=>{rows.push(pkHead(p,i+1));for(const l of S.lines.filter(l=>l.p===p.id))rows.push(rowHtml(l,true));if(p.ibo)rows.push(`<tr class="inpk ibo"><td colspan="7">${esc(IBO_TXT)}<span class="ibo-tag">not priced</span></td></tr>`)});
   const order=S.lines.filter(l=>!ids.has(l.p)).sort((a,b)=>(a.o-b.o)||(SEC_ORDER.indexOf(a.sec)-SEC_ORDER.indexOf(b.sec)));
   let cur="";
   for(const l of order){
@@ -333,10 +344,12 @@ $("rows").addEventListener("input",e=>{const f=e.target.dataset.pf;if(!f||!["tit
 $("rows").addEventListener("change",e=>{const tr=e.target.closest("tr[data-pk]");if(!tr)return;const p=S.pk.find(x=>x.id===tr.dataset.pk);if(!p)return;const f=e.target.dataset.pf,a=e.target.dataset.pa;
   if(f==="date"){p.date=e.target.value||"";changed();return}
   if(f==="tbc"){p.date=e.target.checked?"":new Date().toISOString().slice(0,10);renderRows();changed();return}
+  if(f==="ibo"){p.ibo=e.target.checked;renderRows();changed();return}
   if(a&&e.target.value){const it=CAT.find(i=>String(i.id)===e.target.value);if(it){const l=lineFrom(it,1,a==="xo"?true:null);l.p=p.id;S.lines.push(l);S.active=p.id;renderRows(it.poa?l.k:null);changed()}}});
 $("rows").addEventListener("click",e=>{
   const sec=e.target.closest("tr.sec");if(sec){setActive("");return}
   const tr=e.target.closest("tr.pkh");if(!tr)return;const id=tr.dataset.pk;
+  if(e.target.closest('[data-pa="edit"]')){setActive(id);if(window.plOpen)plOpen("");return}
   if(e.target.closest('[data-pa="delpk"]')){S.pk=S.pk.filter(p=>p.id!==id);S.lines=S.lines.filter(l=>l.p!==id);if(S.active===id)S.active="";renderRows();changed();return}
   if(S.active!==id)setActive(id)});
 $("rows").addEventListener("input",e=>{
@@ -367,7 +380,7 @@ function payload(mode){
     co:{n:co.n||"",a:(co.a||[]).filter(Boolean)},ct:ct?{n:ct.n,e:ct.e||"",j:ct.j||""}:null,
     ap:{level:lvl,by:lvl?S.ap:""},
     l:ord.map(l=>[l.n,l.q,l.price||0,l.d||0,l.sec,l.g,l.o?1:0,S.pk.some(p=>p.id===l.p)?l.p:""]),
-    pk:S.pk.map(p=>[p.id,p.title,p.ref,p.std,isDate(p.date)?p.date:"TBC"]),pay:payTerms()};
+    pk:S.pk.map(p=>[p.id,p.title,p.ref,p.std,isDate(p.date)?p.date:"TBC",p.ibo?1:0]),pay:payTerms()};
   if(mode)q.mode=mode;
   return QUOTE_PAGE+"#q="+encodeURIComponent(JSON.stringify(q));
 }
@@ -409,7 +422,7 @@ function changed(light){
   if(C.live){$("b-save").style.display="";$("b-save").disabled=!S.lines.length||!!poa}
   $("h-ref").textContent=`${refBase()}-R${S.rev}`;
   save();
-  clearTimeout(pvT);pvT=setTimeout(()=>{if(!$("main").classList.contains("nopv"))$("pvframe").src=payload()+"&pv="+Date.now()},light?600:150);
+
 }
 function bindMeta(){
   const co=C.co||[];
@@ -434,7 +447,7 @@ window.addEventListener("resize",fitPreview);
 
 (async()=>{
 C=parseHash();
-if(C&&C.api&&C.t){try{const [cat,dl]=await Promise.all([loadProducts(),api("/deal").catch(e=>{console.error(e);return null})]);CAT=cat;C.live=CAT.length>0;
+if(C&&C.api&&C.t){try{const [cat,dl,so]=await Promise.all([loadProducts(),api("/deal").catch(e=>{console.error(e);return null}),api("/options?p=service_type").catch(e=>{console.error(e);return null})]);if(Array.isArray(so)&&so.length)C.std=so;CAT=cat;C.live=CAT.length>0;
   if(dl){C.company=dl.company||null;if(QRX.test(dl.deal?.uktc_quote_ref||""))C.ref=dl.deal.uktc_quote_ref;if(!C.rev&&dl.deal?.uktc_quote_revision)C.rev=Number(dl.deal.uktc_quote_revision)}}catch(e){console.error("Product Library unavailable",e)}}
 if(C&&!C.live&&!C.cat&&C.k){try{C.cat=await loadCat(C.k)}catch(e){console.error(e);C=null}}
 if(!C){document.body.innerHTML=`<div class="empty" style="margin-top:60px"><img src="data:image/png;base64,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" style="height:50px" alt="UKTC"><h2>Open the quote builder from a HubSpot deal</h2><p>This page needs the deal and price list passed from the UKTC quote card in HubSpot.</p></div>`;}
@@ -458,25 +471,30 @@ else{
 (function(){
 let plG="",plSel=0,plRows=[];
 const hl=(t,w)=>{let h=esc(t);for(const x of w){if(x.length<2)continue;h=h.replace(new RegExp("("+x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"),"<mark>$1</mark>")}return h};
-function targets(){const t=$("pltgt");t.innerHTML='<option value="">The quote (no test)</option>'+S.pk.map((p,i)=>`<option value="${p.id}">Test ${i+1} – ${esc(p.title.slice(0,60))}</option>`).join("");t.value=S.pk.some(p=>p.id===S.active)?S.active:""}
+function targets(){const t=$("pltgt");t.innerHTML='<option value="">The quote (no test)</option><option value="__new">+ New test</option>'+S.pk.map((p,i)=>`<option value="${p.id}">Test ${i+1} – ${esc(p.title.slice(0,60))}</option>`).join("");t.value=S.pk.some(p=>p.id===S.active)?S.active:""}
 function groups(){const cnt={};CAT.forEach(i=>cnt[i.g]=(cnt[i.g]||0)+1);
   $("plg").innerHTML=[`<button data-g="" class="${plG?"":"on"}">All <small>${CAT.length}</small></button>`,...Object.keys(cnt).map(g=>`<button data-g="${esc(g)}" class="${plG===g?"on":""}">${esc(g)} <small>${cnt[g]}</small></button>`)].join("")}
 function render(){const w=$("plq").value.toLowerCase().split(/\s+/).filter(Boolean);
+  const IB={id:"__ibo",n:"Installation by others (not priced)",g:"Installation – vertical",sku:"",p:0,poa:false,x:false,ibo:true};
   plRows=CAT.filter(i=>(!plG||i.g===plG)&&w.every(x=>(i.n+" "+i.g+" "+(i.sku||"")).toLowerCase().includes(x)));
+  if((!plG||/^Installation/.test(plG))&&w.every(x=>("installation by others client contractor "+IB.g).toLowerCase().includes(x))){if(plG&&plG!==IB.g)IB.g=plG;const k=plRows.findIndex(i=>i.g===IB.g);plRows.splice(k<0?plRows.length:k,0,IB)}
   if(plSel>=plRows.length)plSel=0;
   let html="",cur=null;
   plRows.forEach((i,k)=>{if(i.g!==cur){cur=i.g;html+=`<tr><th class="gh" colspan="3">${esc(cur)}</th></tr>`}
     const test=typeof isTest==="function"&&isTest(i);
-    html+=`<tr class="r${k===plSel?" sel":""}" data-id="${esc(i.id)}" style="${k===plSel?"outline:2px solid #f3b0b4;outline-offset:-2px":""}"><td><div>${hl(i.n,w)}${test?'<span class="tg t">starts a test</span>':""}${i.x?'<span class="tg">optional by default</span>':""}</div><div class="gp">${esc(i.g)}${i.sku?" · "+hl(i.sku,w):""}</div></td><td class="pr">${i.poa?"POA":gbp(i.p)}</td><td class="ad"><button data-add="${esc(i.id)}">Add</button></td></tr>`});
+    html+=`<tr class="r${k===plSel?" sel":""}" data-id="${esc(i.id)}" style="${k===plSel?"outline:2px solid #f3b0b4;outline-offset:-2px":""}"><td><div>${hl(i.n,w)}${test?'<span class="tg t">starts a test</span>':""}${i.x?'<span class="tg">optional by default</span>':""}</div><div class="gp">${esc(i.g)}${i.sku?" · "+hl(i.sku,w):""}</div></td><td class="pr">${i.ibo?"By others":i.poa?"POA":gbp(i.p)}</td><td class="ad"><button data-add="${esc(i.id)}">Add</button></td></tr>`});
   $("pll").innerHTML=plRows.length?`<table>${html}</table>`:'<div class="empty" style="padding:40px">No matches. Try fewer words, or pick "All".</div>'}
-function add(id){const it=CAT.find(i=>String(i.id)===String(id));if(!it)return;S.active=$("pltgt").value;
-  const before=S.pk.length;addItem(it.id);
+function add(id){S.active=$("pltgt").value;
+  if(id==="__ibo"){const tp=S.pk.find(p=>p.id===S.active);if(!tp){$("plmsg").textContent="Choose a test in 'Add to' first – installation by others applies to a test.";return}tp.ibo=true;renderRows();changed();targets();$("plmsg").textContent=`Installation by others set on ${$("pltgt").selectedOptions[0].textContent}`;return}
+  const it=CAT.find(i=>String(i.id)===String(id));if(!it)return;
+  const before=S.pk.length;addItem(it.id,true);
   const tgt=S.pk.length>before?`new Test ${S.pk.length}`:(S.active?$("pltgt").selectedOptions[0].textContent:"the quote");
   targets();$("plmsg").textContent=`Added: ${it.n.slice(0,70)} → ${tgt}`;
   const tr=$("pll").querySelector(`tr[data-id="${CSS.escape(String(id))}"]`);if(tr){tr.classList.add("done");setTimeout(()=>tr.classList.remove("done"),900)}}
 window.plOpen=function(q){if(!CAT.length)return;$("pl").hidden=false;$("plq").value=q!=null?q:$("q").value;$("plmsg").textContent="";targets();groups();render();setTimeout(()=>{$("plq").focus();$("plq").select()},0)};
 const close=()=>{$("pl").hidden=true};
 $("b-pl").onclick=()=>plOpen("");
+$("b-addtest").onclick=()=>{if(!CAT.length)return;addEmptyTest();plOpen("")};
 $("plx").onclick=close;
 $("pl").addEventListener("mousedown",e=>{if(e.target.id==="pl")close()});
 $("plq").addEventListener("input",()=>{plSel=0;render()});
@@ -486,7 +504,7 @@ $("plq").addEventListener("keydown",e=>{
   else if(e.key==="ArrowUp"){e.preventDefault();plSel=Math.max(0,plSel-1);render();$("pll").querySelector("tr.sel")?.scrollIntoView({block:"nearest"})}});
 $("plg").onclick=e=>{const b=e.target.closest("button");if(!b)return;plG=b.dataset.g;plSel=0;groups();render();$("plq").focus()};
 $("pll").onclick=e=>{const b=e.target.closest("button[data-add]");if(b)add(b.dataset.add);else{const tr=e.target.closest("tr.r");if(tr)add(tr.dataset.id)}};
-$("pltgt").onchange=()=>{S.active=$("pltgt").value;if(typeof setActive==="function")setActive(S.active);$("plq").focus()};
+$("pltgt").onchange=()=>{if($("pltgt").value==="__new"){addEmptyTest();targets()}S.active=$("pltgt").value;if(typeof setActive==="function")setActive(S.active);$("plq").focus()};
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();plOpen()}else if(e.key==="Escape"&&!$("pl").hidden){close()}});
 $("q").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.shiftKey){e.preventDefault();plOpen($("q").value)}});
 })();
