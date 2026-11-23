@@ -57,6 +57,14 @@ ul.cl li{margin-bottom:.6mm}
 .terms ul,.terms ol{margin:0 0 1mm 3mm;padding-left:2mm}
 .err{max-width:160mm;margin:30mm auto;background:#fff;padding:10mm;border-radius:3mm}
 .ok-msg{background:#eef6ee;border:1px solid #9fcf9f;color:#245c25;padding:3mm 4mm;border-radius:2mm;margin-top:3mm}
+.pk{border:1px solid var(--line);border-radius:2mm;margin-top:5mm;overflow:hidden;break-inside:avoid}
+.pkh{display:flex;justify-content:space-between;align-items:flex-start;gap:4mm;background:var(--soft);padding:2.5mm 3mm;border-left:3px solid var(--red)}
+.pkm{font-size:8.5pt;color:var(--mut)}
+.pk table{margin:0}.pk th{border-bottom-width:1px}
+tr.st td{border-bottom:none;font-weight:700;background:#fafafa}
+tr.po td{color:#555;font-style:italic}
+.tag{font-style:normal;font-size:7.5pt;border:1px solid #bbb;border-radius:1mm;padding:0 1mm;color:#555}
+.pay{margin-top:3mm;font-size:9pt}
 .fp{font-family:Consolas,monospace;font-size:7.5pt;color:var(--mut);word-break:break-all}
 @page{size:A4;margin:12mm 14mm 14mm}
 @media print{
@@ -387,10 +395,10 @@ function parse(){
   const m=location.hash.match(/q=([^&]+)/); if(!m) return null;
   try{return JSON.parse(decodeURIComponent(m[1]))}catch(e){return null}
 }
-const lines=()=>Q.l.map((r,i)=>({i,name:r[0],qty:+r[1],list:+r[2],disc:+r[3],sec:r[4],grp:r[5],opt:!!r[6]})).map(l=>({...l,unit:Math.round(l.list*(1-l.disc/100)*100)/100}));
+const lines=()=>{const pks=new Set((Q.pk||[]).map(p=>p[0]));return Q.l.map((r,i)=>({i,name:r[0],qty:+r[1],list:+r[2],disc:+r[3],sec:r[4],grp:r[5],opt:!!r[6],pk:pks.has(r[7])?r[7]:""})).map(l=>({...l,unit:Math.round(l.list*(1-l.disc/100)*100)/100,tot:Math.round(l.qty*l.list*(1-l.disc/100)*100)/100}))};
 function calc(){
   const L=lines(); const core=L.filter(l=>!l.opt), ext=L.filter(l=>l.opt&&picked.has(l.i));
-  const net=[...core,...ext].reduce((s,l)=>s+l.qty*l.unit,0); const rate=(VAT[Q.vat]||VAT.S).r;
+  const net=[...core,...ext].reduce((s,l)=>s+l.tot,0); const rate=(VAT[Q.vat]||VAT.S).r;
   return {L,core,ext,net,vat:net*rate,total:net*(1+rate)};
 }
 async function sha(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
@@ -400,14 +408,20 @@ function render(){
   const expired=new Date(validTo+"T23:59:59")<new Date();
   const approvalPending=Q.ap&&Q.ap.level>0&&!Q.ap.by;
   const showDisc=c.L.some(l=>l.disc>0);
-  const row=l=>`<tr><td class="n q">${l.qty}</td><td>${esc(l.name)}</td><td class="n">${gbp(l.list)}</td>${showDisc?`<td class="n">${l.disc?l.disc+"%":""}</td>`:""}<td class="n">${gbp(l.qty*l.unit)}</td></tr>`;
+  const row=l=>`<tr><td class="n q">${l.qty}</td><td>${esc(l.name)}</td><td class="n">${gbp(l.list)}</td>${showDisc?`<td class="n">${l.disc?l.disc+"%":""}</td>`:""}<td class="n">${gbp(l.tot)}</td></tr>`;
   const head=`<tr><th class="q">Qty</th><th>Description</th><th class="n">Unit price</th>${showDisc?`<th class="n">Disc</th>`:""}<th class="n">Total net</th></tr>`;
   let body="";
-  for(const s of SECTIONS){const ls=c.core.filter(l=>l.sec===s); if(ls.length) body+=`<h3>${s}</h3><table>${head}${ls.map(row).join("")}</table>`;}
-  const opts=c.L.filter(l=>l.opt);
+  const ukd=d=>/^\d{4}-\d{2}-\d{2}$/.test(d)?new Date(d+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"long",year:"numeric"}):"TBC";
+  const cb=l=>accept?`<td>${l.opt?`<input type="checkbox" data-i="${l.i}" ${picked.has(l.i)?"checked":""} ${accepted?"disabled":""} aria-label="Include ${esc(l.name)}">`:""}</td>`:"";
+  const prow=l=>`<tr${l.opt?' class="po"':""}>${cb(l)}<td class="n q">${l.qty}</td><td>${esc(l.name)}${l.opt?` <span class="tag">${picked.has(l.i)?"selected":"optional"}</span>`:""}</td><td class="n">${gbp(l.list)}</td>${showDisc?`<td class="n">${l.disc?l.disc+"%":""}</td>`:""}<td class="n">${gbp(l.tot)}</td></tr>`;
+  const phead=`<tr>${accept?"<th style='width:8mm'></th>":""}<th class="q">Qty</th><th>Description</th><th class="n">Unit price</th>${showDisc?`<th class="n">Disc</th>`:""}<th class="n">Total net</th></tr>`;
+  (Q.pk||[]).forEach((p,n)=>{const ls=c.L.filter(l=>l.pk===p[0]);if(!ls.length)return;const sub=ls.filter(l=>!l.opt||picked.has(l.i)).reduce((s,l)=>s+l.tot,0);
+    body+=`<div class="pk"><div class="pkh"><div><b>Test ${n+1} – ${esc(p[1])}</b><div class="pkm">Project ref: ${esc(p[2]||"–")}${p[3]?` &nbsp;·&nbsp; Standard: ${esc(p[3])}`:""} &nbsp;·&nbsp; Test date: ${ukd(p[4])}</div></div><div class="n"><span class="pkm">Package</span><br><b>${gbp(sub)}</b></div></div><table>${phead}${ls.map(prow).join("")}<tr class="st">${accept?"<td></td>":""}<td></td><td>Package subtotal${ls.some(l=>l.opt&&!picked.has(l.i))?" (excluding optional items)":""}</td><td></td>${showDisc?"<td></td>":""}<td class="n">${gbp(sub)}</td></tr></table></div>`});
+  for(const s of SECTIONS){const ls=c.core.filter(l=>l.sec===s&&!l.pk); if(ls.length) body+=`<h3>${s}</h3><table>${head}${ls.map(row).join("")}</table>`;}
+  const opts=c.L.filter(l=>l.opt&&!l.pk);
   let optHtml="";
   if(opts.length){
-    optHtml=`<div style="break-inside:avoid"><h3>Optional extras</h3><p class="small" style="margin:0 0 1.5mm">${accept&&!accepted?"Tick any extras you would like to include. The totals update as you go.":"Not included in the total unless selected on acceptance."}</p><table class="opt"><tr>${accept?"<th style='width:8mm'></th>":""}<th class="q">Qty</th><th>Description</th><th class="n">Unit price</th><th class="n">Total net</th></tr>${opts.map(l=>`<tr>${accept?`<td><input type="checkbox" data-i="${l.i}" ${picked.has(l.i)?"checked":""} ${accepted?"disabled":""} aria-label="Include ${esc(l.name)}"></td>`:""}<td class="n q">${l.qty}</td><td>${esc(l.name)}${picked.has(l.i)?" <b>(selected)</b>":""}</td><td class="n">${gbp(l.unit)}</td><td class="n">${gbp(l.qty*l.unit)}</td></tr>`).join("")}</table></div>`;
+    optHtml=`<div style="break-inside:avoid"><h3>Optional extras</h3><p class="small" style="margin:0 0 1.5mm">${accept&&!accepted?"Tick any extras you would like to include. The totals update as you go.":"Not included in the total unless selected on acceptance."}</p><table class="opt"><tr>${accept?"<th style='width:8mm'></th>":""}<th class="q">Qty</th><th>Description</th><th class="n">Unit price</th><th class="n">Total net</th></tr>${opts.map(l=>`<tr>${accept?`<td><input type="checkbox" data-i="${l.i}" ${picked.has(l.i)?"checked":""} ${accepted?"disabled":""} aria-label="Include ${esc(l.name)}"></td>`:""}<td class="n q">${l.qty}</td><td>${esc(l.name)}${picked.has(l.i)?" <b>(selected)</b>":""}</td><td class="n">${gbp(l.unit)}</td><td class="n">${gbp(l.tot)}</td></tr>`).join("")}</table></div>`;
   }
   const groups=[...new Set(c.L.filter(l=>!l.opt||picked.has(l.i)).map(l=>CLAR_GROUP(l.grp)))].filter(g=>CLAR[g]);
   const clar=groups.map(g=>`<p style="margin:1.5mm 0 0"><b>${esc(g)}</b></p><ul class="cl">${CLAR[g].map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`).join("")+(Q.notes?`<p style="margin:1.5mm 0 0"><b>Quote-specific clarifications</b></p><p class="small">${esc(Q.notes).replace(/\n/g,"<br>")}</p>`:"");
@@ -433,11 +447,12 @@ function render(){
     ${body}
     <table class="tot">
       <tr><td class="k">Total net</td><td class="n">${gbp(c.net)}</td></tr>
-      ${c.ext.length?`<tr><td class="small">includes selected extras</td><td class="n small">${gbp(c.ext.reduce((s,l)=>s+l.qty*l.unit,0))}</td></tr>`:""}
+      ${c.ext.length?`<tr><td class="small">includes selected extras</td><td class="n small">${gbp(c.ext.reduce((s,l)=>s+l.tot,0))}</td></tr>`:""}
       <tr><td class="k">${esc((VAT[Q.vat]||VAT.S).l)}</td><td class="n">${gbp(c.vat)}</td></tr>
       <tr class="g"><td>Total</td><td class="n">${gbp(c.total)}</td></tr>
     </table>
     ${Q.ap&&Q.ap.level>0&&Q.ap.by?`<p class="small" style="text-align:right">Commercial terms approved by ${esc(Q.ap.by)}</p>`:""}
+    ${Q.pay?`<p class="pay"><b style="color:var(--red)">Payment terms:</b> ${esc(Q.pay)}</p>`:""}
     ${optHtml}
     <h3>Clarifications</h3>${clar||'<p class="small">None.</p>'}
     <h3>Conditions</h3><div class="small">${STANDARD.map(x=>`<p>${esc(x)}</p>`).join("")}</div>
@@ -450,11 +465,11 @@ function render(){
   bar.innerHTML=`<b>${esc(ref)} · ${esc(Q.co.n)}</b>`+(accepted?`<button class="pri" id="b-mail">Send acceptance to UKTC</button><button id="b-pdf">Download signed copy (PDF)</button>`:`<button class="pri" id="b-pdf">Download PDF</button>`);
   document.getElementById("b-pdf").onclick=()=>{document.title=`${ref} ${Q.co.n||""}${accepted?" – accepted":""}`.trim();window.print()};
   const bm=document.getElementById("b-mail"); if(bm) bm.onclick=()=>{
-    const ex=c.ext.map(l=>`- ${l.qty} x ${l.name} (${gbp(l.qty*l.unit)})`).join("\n")||"- none";
+    const ex=c.ext.map(l=>`- ${l.qty} x ${l.name} (${gbp(l.tot)})`).join("\n")||"- none";
     const body=`Quotation ${ref} has been accepted online.\n\nCustomer: ${Q.co.n}\nAccepted by: ${accepted.name}, ${accepted.position} (${accepted.email})\nPO: ${accepted.po||"-"}\nDate: ${accepted.at.toLocaleString("en-GB")}\nTotal net: ${gbp(c.net)}\nTotal inc VAT: ${gbp(c.total)}\nOptional extras selected:\n${ex}\n\nHubSpot deal: ${Q.deal}\nDocument fingerprint: ${fingerprint}\n\nPlease attach the signed PDF.`;
     location.href=`mailto:info@uktestcert.com?subject=${encodeURIComponent("Quotation accepted – "+ref)}&body=${encodeURIComponent(body)}`;
   };
-  document.querySelectorAll(".opt input[type=checkbox]").forEach(cb=>cb.onchange=()=>{const i=+cb.dataset.i;cb.checked?picked.add(i):picked.delete(i);keepForm(render)});
+  document.querySelectorAll("input[data-i]").forEach(cb=>cb.onchange=()=>{const i=+cb.dataset.i;cb.checked?picked.add(i):picked.delete(i);keepForm(render)});
   const go=document.getElementById("f-go"); if(go) go.onclick=async()=>{
     const v=id=>document.getElementById(id).value.trim(); const err=document.getElementById("f-err");
     if(!v("f-name")||!v("f-pos")||!/^\S+@\S+\.\S+$/.test(v("f-email"))){err.textContent="Enter your name, position and a valid email.";return}
