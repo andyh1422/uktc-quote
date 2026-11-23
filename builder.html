@@ -52,6 +52,18 @@ td input[type=number]{text-align:right;padding:4px 5px}
 .q{width:64px}.pc{width:100px}.dc{width:66px}.lc{width:96px;font-variant-numeric:tabular-nums}.oc{width:58px;text-align:center}.xc{width:78px;white-space:nowrap}
 tr.sec td{background:var(--soft);font-weight:600;font-size:11.5px;color:var(--red);padding:5px 6px}
 tr.opt td{background:#fbfbff}
+tr.pkh td{background:#fff5f5;border-top:2px solid var(--red);padding:6px 6px 5px}
+tr.pkh.act td{background:#ffe3e5;box-shadow:inset 3px 0 0 var(--red)}
+tr.pkh{cursor:pointer}
+.pkrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pkrow input[type=text]{width:auto}
+.pkt{font-weight:600;min-width:200px;flex:1}
+.pkref{width:140px!important;font-family:Consolas,monospace}
+.pkstd{width:170px!important}
+.pkdate{width:135px!important}
+.pkadd select{width:auto;max-width:240px;font-size:12px;padding:3px 5px}
+.pkn{font-weight:700;color:var(--red);white-space:nowrap}
+tr.inpk td:first-child{padding-left:16px}
 .tag{font-size:10px;padding:1px 6px;border-radius:8px;margin-left:4px;white-space:nowrap}
 .tag.poa{background:var(--badb);color:var(--bad)}
 .tag.ov{background:var(--warnb);color:var(--warn)}
@@ -111,7 +123,7 @@ details summary{cursor:pointer;font-size:12px;color:var(--mut)}
     <div id="cat"></div>
   </aside>
   <section id="mid">
-    <div id="gridwrap"><table><thead><tr><th>Description</th><th class="n q">Qty</th><th class="n pc">Unit £</th><th class="n dc">Disc %</th><th class="n lc">Line £</th><th class="oc">Optional</th><th class="xc"></th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty">Pick a template above, or click items in the price list to add them.</div></div>
+    <div id="gridwrap"><table><thead><tr><th>Description</th><th class="n q">Qty</th><th class="n pc">Unit £</th><th class="n dc">Disc %</th><th class="n lc">Line £</th><th class="oc">Optional</th><th class="xc"></th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty">Pick a template above, or click a test in the price list to start a test package. Other items go into the highlighted test, or the quote if no test is highlighted.</div></div>
     <footer>
       <div class="tots">
         <div class="t"><span>List value</span><b id="t-list">£0.00</b></div>
@@ -142,6 +154,12 @@ const QUOTE_PAGE=new URL('./',location.href).href;
 const VATR={S:.2,Z:0,RC:0}, VATL={S:"VAT @ 20%",Z:"VAT (zero rated)",RC:"VAT (reverse charge)"};
 const SEC_ORDER=["Testing","Installation","Technical services","Certification"];
 const APPROVERS=[["Mark Garfield","Sales Director",1],["Andrew Hutchison","Operations Director",2]];
+const TEMPLATES_PK={
+ doorset:{pk:[["FR-V33-NLB-060-1634",1,[["FR-SC-EI60-33",1,0],["FR-IV-DSADD",1,0],["FR-XO-WEEKEND",1,1]]],["FR-V33-NLB-060-1634",1,[["FR-SC-EI60-33",1,0],["FR-IV-DSADD",1,0]]],["SM-TEST",2,[["SM-SC",1,0]]]],q:[["TS-CL-DOOR",1,0],["TS-EXAP-TIMBER",1,0],["FR-XO-HARDCOPY",1,1]]},
+ partition:{pk:[["FR-V33-NLB-060-13641",1,[["FR-IV-WB1-33",1,0],["FR-XO-MIRROR",1,1],["FR-XO-FT-WUNL",30,1]]]],q:[["TS-CL-PART",1,0]]},
+ r2f:{pk:[["R2F-SBI",1,[["R2F-XO-MOUNT",1,1]]],["R2F-11925",1,[]]],q:[["TS-CL-R2F",1,0]]},
+ ensure:{pk:[],q:[["CERT-ENS-APP",1,0],["CERT-ENS-SUB",1,0],["CERT-FPC-DAY",1,0],["CERT-ENS-TR10",1,0],["CERT-ENS-TS-DOM",1,0]]}
+};
 const TEMPLATES_SKU={
  doorset:[["FR-V33-NLB-060-1634",2,0],["FR-SC-EI60-33",2,0],["FR-IV-DSADD",2,0],["SM-TEST",2,0],["TS-CL-DOOR",1,0],["TS-EXAP-TIMBER",1,0],["FR-XO-HARDCOPY",1,1],["FR-XO-WEEKEND",1,1]],
  partition:[["FR-V33-NLB-060-13641",1,0],["FR-IV-WB1-33",1,0],["TS-CL-PART",1,0],["FR-XO-MIRROR",1,1],["FR-XO-FT-WUNL",30,1]],
@@ -178,7 +196,7 @@ async function loadProducts(){
 function fresh(){
   const co0=(C.co&&C.co[0])||{};
   const uk=!co0.c||/^(united kingdom|uk|gb|great britain|england|scotland|wales|northern ireland)$/i.test(String(co0.c).trim());
-  return {co:0,ct:"",vat:uk?"S":"Z",cref:"",rev:Math.max(1,Number(C.rev)||1),valid:30,proj:C.deal?.n||"",notes:"",ap:"",lines:[]};
+  return {pk:[],active:"",samp:false,co:0,ct:"",vat:uk?"S":"Z",cref:"",rev:Math.max(1,Number(C.rev)||1),valid:30,proj:C.deal?.n||"",notes:"",ap:"",lines:[]};
 }
 function save(){try{localStorage.setItem(key,JSON.stringify(S));$("saved").textContent="Draft saved "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}catch(e){$("saved").textContent=""}}
 function load(){try{const s=JSON.parse(localStorage.getItem(key)||"null");if(s&&Array.isArray(s.lines))return s}catch(e){}return null}
@@ -198,48 +216,99 @@ function renderCat(){
   const list=CAT.filter(i=>(!grp||i.g===grp)&&words.every(w=>(i.n+" "+i.g+" "+(i.sku||"")).toLowerCase().includes(w)));
   $("cat").innerHTML=list.map(i=>`<div class="ci" data-id="${i.id}" title="Click to add"><div class="nm">${esc(i.n)}<div class="gp">${esc(i.g)}${i.x?" · extra over":""}</div></div><div class="pr">${i.poa?"POA":gbp(i.p)}</div><div class="add">+</div></div>`).join("")||'<div class="empty">No matches</div>';
 }
-function lineFrom(it,qty=1,opt=null){return {k:Math.random().toString(36).slice(2,9),id:it.id,pid:it.pid||"",sku:it.sku||"",n:it.n,sec:it.sec,g:it.g,q:qty,list:it.poa?0:it.p,price:it.poa?0:it.p,poa:it.poa,d:0,o:opt===null?it.x:!!opt}}
-function addItem(id){const it=CAT.find(i=>i.id===id);if(!it)return;S.lines.push(lineFrom(it));renderRows(it.poa?S.lines.at(-1).k:null);changed()}
+function lineFrom(it,qty=1,opt=null){return {k:Math.random().toString(36).slice(2,9),p:"",id:it.id,pid:it.pid||"",sku:it.sku||"",n:it.n,sec:it.sec,g:it.g,q:qty,list:it.poa?0:it.p,price:it.poa?0:it.p,poa:it.poa,d:0,o:opt===null?it.x:!!opt}}
+const TEST_G=new Set(["Fire resistance","Smoke control","Reaction to fire"]);
+const isTest=it=>TEST_G.has(it.g)&&!it.x&&!/^SM-(SC|ADD)|^R2F-XO/.test(it.sku||"");
+const PKG_OK=it=>/^(FR-(SC|IV|IH|XO)|SM-|R2F-XO)/.test(it.sku||"")||/Installation|Supporting construction|extra overs/i.test(it.g||"");
+const STD_RX=/\b(BS\s(?:EN\s)?(?:ISO\s)?\d+(?:-\d+)*(?:\.\d+)?(?:\+A\d)?(?::\d{4})?)/;
+const stdOf=n=>{const m=String(n).match(STD_RX);return m?m[1]:""};
+function ukRef(d){const f=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(d);const g=t=>f.find(x=>x.type===t).value;return `${g("year")}${g("month")}${g("day")}-${g("second")}${g("minute")}${g("hour")}`}
+function newRef(){const used=new Set(S.pk.map(p=>p.ref));const dm=String(C.deal?.n||"").match(/^(\d{8}-\d{6}[A-Z]?)/);if(dm&&!used.has(dm[1]))return dm[1];let t=Date.now(),r=ukRef(new Date(t));while(used.has(r)){t+=1000;r=ukRef(new Date(t))}return r}
+function boltOns(test){const s=test&&test.sku||"";const f=rx=>CAT.filter(i=>rx.test(i.sku||""));
+  const m=s.match(/^FR-V(33|53)-/);
+  if(m){const z=m[1];const fit=i=>i.sku.endsWith("-"+z)||!/-(33|53)$/.test(i.sku);return {sc:f(/^FR-SC-/).filter(fit),inst:f(/^FR-IV-/).filter(fit),xo:f(/^FR-XO-/)}}
+  if(/^FR-H43-/.test(s))return {sc:[],inst:f(/^FR-IH-/),xo:f(/^FR-XO-/)};
+  if(/^SM-/.test(s))return {sc:f(/^SM-SC/),inst:f(/^FR-IV-D/),xo:f(/^SM-ADD/)};
+  if(/^R2F-/.test(s))return {sc:[],inst:[],xo:f(/^R2F-XO-/)};
+  return {sc:[],inst:[],xo:[]}}
+function autoSampling(){if(S.samp||!C.live)return;const it=CAT.find(i=>i.sku==="SAMP-DAY");if(it){S.lines.push(lineFrom(it,1,true));S.samp=true}}
+function addPackage(it,q=1,extra=[]){const id="p"+Math.random().toString(36).slice(2,8);S.pk.push({id,title:it.n,ref:newRef(),std:stdOf(it.n),date:""});S.active=id;
+  const l=lineFrom(it,q,false);l.p=id;S.lines.push(l);
+  for(const [sku,qq,o] of extra){const b=CAT.find(i=>i.sku===sku);if(b){const x=lineFrom(b,qq,!!o);x.p=id;S.lines.push(x)}}
+  autoSampling();return id}
+function addItem(id){const it=CAT.find(i=>i.id===id);if(!it)return;
+  if(isTest(it)){addPackage(it);renderRows(it.poa?S.lines.find(l=>l.p===S.active).k:null);changed();return}
+  const l=lineFrom(it);const ap=S.pk.find(p=>p.id===S.active);if(ap&&PKG_OK(it))l.p=ap.id;S.lines.push(l);renderRows(it.poa?l.k:null);changed()}
 function applyTemplate(k){
-  if(C.live&&TEMPLATES_SKU[k]){for(const [sku,q,o] of TEMPLATES_SKU[k]){const it=CAT.find(i=>i.sku===sku);if(it)S.lines.push(lineFrom(it,q,o))}if(!S.proj&&C.deal?.n)S.proj=C.deal.n;renderRows();changed();return}
+  if(C.live&&TEMPLATES_PK[k]){const t=TEMPLATES_PK[k];for(const [sku,q,ex] of t.pk){const it=CAT.find(i=>i.sku===sku);if(it)addPackage(it,q,ex)}for(const [sku,q,o] of t.q){const it=CAT.find(i=>i.sku===sku);if(it)S.lines.push(lineFrom(it,q,!!o))}if(!S.proj&&C.deal?.n)S.proj=C.deal.n;renderRows();changed();return}
   const t=TEMPLATES.find(t=>t[0]===k);if(!t)return;
   for(const [g,txt,q,o] of t[2]){const it=CAT.find(i=>i.g===g&&i.n.toLowerCase().includes(txt.toLowerCase()));if(it)S.lines.push(lineFrom(it,q,o))}
   if(!S.proj&&C.deal?.n)S.proj=C.deal.n;
   renderRows();changed();
 }
 const unitNet=l=>r2((l.price||0)*(1-(l.d||0)/100));
+const lineNet=l=>r2((l.q||0)*(l.price||0)*(1-(l.d||0)/100));
 function totals(){
   const core=S.lines.filter(l=>!l.o);
   const list=core.reduce((s,l)=>s+l.q*(l.poa?(l.price||0):(l.list||0)),0);
-  const net=core.reduce((s,l)=>s+l.q*unitNet(l),0);
-  const opt=S.lines.filter(l=>l.o).reduce((s,l)=>s+l.q*unitNet(l),0);
+  const net=core.reduce((s,l)=>s+lineNet(l),0);
+  const opt=S.lines.filter(l=>l.o).reduce((s,l)=>s+lineNet(l),0);
   const disc=Math.max(0,list-net), pct=list>0?disc/list*100:0, vat=net*(VATR[S.vat]??.2);
   return {list,net,disc,pct,vat,tot:net+vat,opt};
 }
 function band(p){return p<=5.0001?0:p<=10.0001?1:2}
 
+function rowHtml(l,inpk){
+  const over=!l.poa&&r2(l.price)!==r2(l.list);
+  return `<tr data-k="${l.k}" class="${l.o?"opt":""}${inpk?" inpk":""}">
+      <td><div class="dsc" contenteditable="true" data-f="n" role="textbox" aria-label="Description">${esc(l.n)}</div>${l.poa&&!l.price?'<span class="tag poa">POA – enter a price</span>':""}${over?`<span class="tag ov" title="List price ${gbp(l.list)}">price changed from ${gbp(l.list)}</span>`:""}${inpk&&l.o?'<span class="tag" style="background:#eef">optional</span>':""}</td>
+      <td class="n q"><input type="number" data-f="q" min="0" step="1" value="${l.q}" aria-label="Quantity"></td>
+      <td class="n pc"><input type="number" data-f="price" min="0" step="0.01" value="${l.price||""}" placeholder="${l.poa?"POA":""}" aria-label="Unit price"></td>
+      <td class="n dc"><input type="number" data-f="d" min="0" max="100" step="0.5" value="${l.d||""}" placeholder="0" aria-label="Discount %"></td>
+      <td class="n lc" data-lt>${gbp(lineNet(l))}</td>
+      <td class="oc"><input type="checkbox" data-f="o" ${l.o?"checked":""} aria-label="Optional extra"></td>
+      <td class="xc"><button class="ib" data-a="up" title="Move up">↑</button><button class="ib" data-a="down" title="Move down">↓</button><button class="ib" data-a="del" title="Remove">✕</button></td></tr>`;
+}
+const isDate=d=>/^\d{4}-\d{2}-\d{2}$/.test(d||"");
+function pkHead(p,n){
+  const ls=S.lines.filter(l=>l.p===p.id);const sub=ls.filter(l=>!l.o).reduce((s,l)=>s+lineNet(l),0);
+  const test=CAT.find(i=>i.id===ls[0]?.id)||null;const bo=boltOns(test);
+  const sel=(k,lab,arr)=>arr.length?`<select data-pa="${k}" aria-label="Add ${lab}"><option value="">+ ${lab}</option>${arr.map(i=>`<option value="${esc(i.id)}">${esc(i.n)} – ${i.poa?"POA":gbp(i.p)}</option>`).join("")}</select>`:"";
+  return `<tr class="pkh${S.active===p.id?" act":""}" data-pk="${p.id}"><td colspan="7">
+    <div class="pkrow"><span class="pkn">Test ${n}</span><input type="text" class="pkt" data-pf="title" value="${esc(p.title)}" aria-label="Test title">
+    <span class="kbd">Project ref</span><input type="text" class="pkref" data-pf="ref" value="${esc(p.ref)}" aria-label="Project reference">
+    <span class="kbd">Standard</span><input type="text" class="pkstd" data-pf="std" value="${esc(p.std)}" aria-label="Standard">
+    <span class="kbd">Test date</span><input type="date" class="pkdate" data-pf="date" value="${isDate(p.date)?p.date:""}" ${isDate(p.date)?"":"disabled"} aria-label="Test date">
+    <label class="kbd"><input type="checkbox" data-pf="tbc" ${isDate(p.date)?"":"checked"}> TBC</label>
+    <button class="ib" data-pa="delpk" title="Remove this test and its lines">✕</button></div>
+    <div class="pkrow pkadd" style="margin-top:4px">${sel("sc","Supporting construction",bo.sc)}${sel("inst","Installation",bo.inst)}${sel("xo","Extra",bo.xo)}<span class="kbd" style="margin-left:auto">Package ${gbp(sub)}</span></div></td></tr>`;
+}
 function renderRows(focusKey){
   const rows=[];
-  const order=[...S.lines].sort((a,b)=>(a.o-b.o)||(SEC_ORDER.indexOf(a.sec)-SEC_ORDER.indexOf(b.sec)));
-  // keep user order within groups: stable sort above preserves insertion order
+  const ids=new Set(S.pk.map(p=>p.id));
+  S.pk.forEach((p,i)=>{rows.push(pkHead(p,i+1));for(const l of S.lines.filter(l=>l.p===p.id))rows.push(rowHtml(l,true))});
+  const order=S.lines.filter(l=>!ids.has(l.p)).sort((a,b)=>(a.o-b.o)||(SEC_ORDER.indexOf(a.sec)-SEC_ORDER.indexOf(b.sec)));
   let cur="";
   for(const l of order){
     const head=l.o?"Optional extras":l.sec;
     if(head!==cur){cur=head;rows.push(`<tr class="sec"><td colspan="7">${esc(head)}</td></tr>`)}
-    const over=!l.poa&&r2(l.price)!==r2(l.list);
-    rows.push(`<tr data-k="${l.k}" class="${l.o?"opt":""}">
-      <td><div class="dsc" contenteditable="true" data-f="n" role="textbox" aria-label="Description">${esc(l.n)}</div>${l.poa&&!l.price?'<span class="tag poa">POA – enter a price</span>':""}${over?`<span class="tag ov" title="List price ${gbp(l.list)}">price changed from ${gbp(l.list)}</span>`:""}</td>
-      <td class="n q"><input type="number" data-f="q" min="0" step="1" value="${l.q}" aria-label="Quantity"></td>
-      <td class="n pc"><input type="number" data-f="price" min="0" step="0.01" value="${l.price||""}" placeholder="${l.poa?"POA":""}" aria-label="Unit price"></td>
-      <td class="n dc"><input type="number" data-f="d" min="0" max="100" step="0.5" value="${l.d||""}" placeholder="0" aria-label="Discount %"></td>
-      <td class="n lc" data-lt>${gbp(l.q*unitNet(l))}</td>
-      <td class="oc"><input type="checkbox" data-f="o" ${l.o?"checked":""} aria-label="Optional extra"></td>
-      <td class="xc"><button class="ib" data-a="up" title="Move up">↑</button><button class="ib" data-a="down" title="Move down">↓</button><button class="ib" data-a="del" title="Remove">✕</button></td></tr>`);
+    rows.push(rowHtml(l,false));
   }
   $("rows").innerHTML=rows.join("");
   $("empty").style.display=S.lines.length?"none":"block";
   if(focusKey){const i=$("rows").querySelector(`tr[data-k="${focusKey}"] input[data-f=price]`);if(i){i.focus();i.scrollIntoView({block:"nearest"})}}
 }
+function setActive(id){S.active=id;[...$("rows").querySelectorAll("tr.pkh")].forEach(r=>r.classList.toggle("act",r.dataset.pk===id))}
+$("rows").addEventListener("input",e=>{const f=e.target.dataset.pf;if(!f||!["title","ref","std"].includes(f))return;const p=S.pk.find(x=>x.id===e.target.closest("tr[data-pk]").dataset.pk);if(p){p[f]=e.target.value;changed(true)}});
+$("rows").addEventListener("change",e=>{const tr=e.target.closest("tr[data-pk]");if(!tr)return;const p=S.pk.find(x=>x.id===tr.dataset.pk);if(!p)return;const f=e.target.dataset.pf,a=e.target.dataset.pa;
+  if(f==="date"){p.date=e.target.value||"";changed();return}
+  if(f==="tbc"){p.date=e.target.checked?"":new Date().toISOString().slice(0,10);renderRows();changed();return}
+  if(a&&e.target.value){const it=CAT.find(i=>String(i.id)===e.target.value);if(it){const l=lineFrom(it,1,a==="xo"?true:null);l.p=p.id;S.lines.push(l);S.active=p.id;renderRows(it.poa?l.k:null);changed()}}});
+$("rows").addEventListener("click",e=>{
+  const sec=e.target.closest("tr.sec");if(sec){setActive("");return}
+  const tr=e.target.closest("tr.pkh");if(!tr)return;const id=tr.dataset.pk;
+  if(e.target.closest('[data-pa="delpk"]')){S.pk=S.pk.filter(p=>p.id!==id);S.lines=S.lines.filter(l=>l.p!==id);if(S.active===id)S.active="";renderRows();changed();return}
+  if(S.active!==id)setActive(id)});
 $("rows").addEventListener("input",e=>{
   const tr=e.target.closest("tr[data-k]");if(!tr)return;const l=S.lines.find(x=>x.k===tr.dataset.k);const f=e.target.dataset.f;
   if(f==="n")l.n=e.target.textContent.replace(/\s+/g," ").trim();
@@ -247,7 +316,7 @@ $("rows").addEventListener("input",e=>{
   if(f==="price"){l.price=Math.max(0,Number(e.target.value)||0);if(l.poa)l.list=l.price}
   if(f==="d")l.d=Math.min(100,Math.max(0,Number(e.target.value)||0));
   if(f==="o"){l.o=e.target.checked;renderRows();changed();return}
-  tr.querySelector("[data-lt]").textContent=gbp(l.q*unitNet(l));
+  tr.querySelector("[data-lt]").textContent=gbp(lineNet(l));
   changed(true);
 });
 $("rows").addEventListener("change",e=>{if(e.target.dataset.f==="price")renderRows()});
@@ -267,21 +336,25 @@ function payload(mode){
     deal:C.deal?.id,project:S.proj,cref:S.cref,notes:S.notes,
     co:{n:co.n||"",a:(co.a||[]).filter(Boolean)},ct:ct?{n:ct.n,e:ct.e||"",j:ct.j||""}:null,
     ap:{level:lvl,by:lvl?S.ap:""},
-    l:ord.map(l=>[l.n,l.q,l.price||0,l.d||0,l.sec,l.g,l.o?1:0])};
+    l:ord.map(l=>[l.n,l.q,l.price||0,l.d||0,l.sec,l.g,l.o?1:0,S.pk.some(p=>p.id===l.p)?l.p:""]),
+    pk:S.pk.map(p=>[p.id,p.title,p.ref,p.std,isDate(p.date)?p.date:"TBC"]),pay:payTerms()};
   if(mode)q.mode=mode;
   return QUOTE_PAGE+"#q="+encodeURIComponent(JSON.stringify(q));
 }
-const refBase=()=>C.ref||`UKTC-Q-${C.deal?.id||"0"}-${C.ymd||""}`;
+const QRX=/^Q\d{2}-\d{4,}$/;
+const refBase=()=>QRX.test(C.ref||"")?C.ref:(C.live?"Q"+new Date().getFullYear().toString().slice(2)+"-NEW":`UKTC-Q-${C.deal?.id||"0"}-${C.ymd||""}`);
+async function ensureRef(){if(!C.live||QRX.test(C.ref||""))return;const r=await api("/quote-number",{method:"POST"});C.ref=r.ref;$("h-ref").textContent=`${refBase()}-R${S.rev}`}
+function payTerms(){const cs=C.company?.credit_status;if(!cs&&!C.company)return "";return cs==="Approved"?"30 days from date of invoice (credit account).":"Payment in advance. A proforma invoice will be issued on acceptance and must be paid before work is scheduled."}
+const pkRef=l=>{const p=S.pk.find(x=>x.id===l.p);return p?`Project ref ${p.ref} – ${p.title}`:""};
 const LEVEL_TXT=["","Sales Director","Operations Director"];
 const STATUS_TXT={ready_to_send:"Ready to send",awaiting_approval:"Awaiting discount approval",approved:"Approved",sent:"Sent to customer",accepted:"Accepted",declined:"Declined"};
 async function saveToDeal(){
   const t=totals();const lvl=band(t.pct);const b=$("b-save");
   const vu=new Date(Date.now()+S.valid*864e5).toISOString().slice(0,10);
   const body={quote:{ref:refBase(),rev:S.rev,level:lvl,approver:lvl?S.ap:"",total:r2(t.tot),vat:r2(t.vat),opt:r2(t.opt),pct:r2(t.pct),vatT:S.vat,validUntil:vu,link:payload()},
-    lines:S.lines.map(l=>({pid:l.pid||"",sku:l.sku||"",n:l.n,q:l.q,price:l.price||0,d:l.d||0,o:!!l.o}))};
+    lines:S.lines.map(l=>({pid:l.pid||"",sku:l.sku||"",n:l.n,q:l.q,price:l.price||0,d:l.d||0,o:!!l.o,pk:pkRef(l)}))};
   b.disabled=true;b.textContent="Saving…";
-  try{const r=await api("/deal/save",{method:"POST",body:JSON.stringify(body)});
-    C.ref=refBase();
+  try{await ensureRef();body.quote.ref=C.ref;body.quote.link=payload();const r=await api("/deal/save",{method:"POST",body:JSON.stringify(body)});
     $("actmsg").textContent=`Saved to deal: ${r.lineItems} line item(s), ${gbp(r.amount)} net – ${STATUS_TXT[r.status]||r.status}${r.status==="awaiting_approval"?` (needs ${LEVEL_TXT[lvl]})`:""}.`;
     $("saved").textContent="Saved to HubSpot "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
   }catch(e){$("actmsg").textContent="Save failed: "+e.message}
@@ -298,6 +371,8 @@ function changed(light){
   $("band").innerHTML=lvl===0?"Discount within rep authority (up to 5%). No approval needed."
     :`${lvl===1?"Sales Director approval required (5–10% discount).":"Operations Director approval required (over 10% discount)."} <span>Approved by</span> <select id="ap"><option value="">Choose approver</option>${ok.map(a=>`<option value="${esc(a[0])}" ${S.ap===a[0]?"selected":""}>${esc(a[0])} – ${esc(a[1])}</option>`).join("")}</select>`;
   const ap=$("ap");if(ap)ap.onchange=()=>{S.ap=ap.value;changed()};
+  const cc=C.company;if(cc){const lim=cc.credit_limit;const over=cc.credit_status==="Approved"&&lim>0&&t.tot>lim;
+    $("band").innerHTML+=` <span style="margin-left:10px;color:${over?"#a8071a":"inherit"}">· ${cc.credit_status==="Approved"?"Credit account"+(lim?` (limit ${gbp(lim)})`:""):"Proforma customer ("+esc(cc.credit_status||"no credit status")+")"}${over?" – quote is over the credit limit":""}</span>`}
   const poa=S.lines.filter(l=>l.poa&&!l.price).length;
   const reason=!S.lines.length?"Add lines to create a quote.":poa?`${poa} POA line(s) need a price.`:(lvl&&!S.ap)?"Record the approver first.":"";
   $("b-open").disabled=$("b-acc").disabled=!!reason;$("actmsg").textContent=reason;
@@ -317,9 +392,9 @@ function bindMeta(){
   $("b-alld").onclick=()=>{const d=Math.min(100,Math.max(0,Number($("alld").value)||0));S.lines.forEach(l=>l.d=d);renderRows();changed()};
   $("b-new").onclick=()=>{if(!S.lines.length||confirmClear()){S.lines=[];renderRows();changed()}};
   $("b-pv").onclick=()=>{$("main").classList.toggle("nopv");changed()};
-  $("b-open").onclick=()=>window.open(payload(),"_blank","noopener");
+  $("b-open").onclick=async()=>{const w=window.open("","_blank");try{await ensureRef()}catch(e){$("actmsg").textContent="Could not issue a quote number: "+e.message}if(w)w.location.href=payload();changed(true)};
   $("b-save").onclick=saveToDeal;
-  $("b-acc").onclick=()=>{$("linkbox").style.display="flex";$("acclink").value=payload("accept");$("acclink").select()};
+  $("b-acc").onclick=async()=>{try{await ensureRef()}catch(e){$("actmsg").textContent="Could not issue a quote number: "+e.message;return}$("linkbox").style.display="flex";$("acclink").value=payload("accept");$("acclink").select()};
   $("b-copy").onclick=async()=>{const i=$("acclink");i.select();try{await navigator.clipboard.writeText(i.value);$("b-copy").textContent="Copied"}catch(e){document.execCommand&&document.execCommand("copy");$("b-copy").textContent="Copied"}setTimeout(()=>$("b-copy").textContent="Copy link",1500)};
 }
 let clearArmed=0;
@@ -329,12 +404,13 @@ window.addEventListener("resize",fitPreview);
 
 (async()=>{
 C=parseHash();
-if(C&&C.api&&C.t){try{CAT=await loadProducts();C.live=CAT.length>0}catch(e){console.error("Product Library unavailable",e)}}
+if(C&&C.api&&C.t){try{const [cat,dl]=await Promise.all([loadProducts(),api("/deal").catch(e=>{console.error(e);return null})]);CAT=cat;C.live=CAT.length>0;
+  if(dl){C.company=dl.company||null;if(QRX.test(dl.deal?.uktc_quote_ref||""))C.ref=dl.deal.uktc_quote_ref;if(!C.rev&&dl.deal?.uktc_quote_revision)C.rev=Number(dl.deal.uktc_quote_revision)}}catch(e){console.error("Product Library unavailable",e)}}
 if(C&&!C.live&&!C.cat&&C.k){try{C.cat=await loadCat(C.k)}catch(e){console.error(e);C=null}}
 if(!C){document.body.innerHTML=`<div class="empty" style="margin-top:60px"><img src="data:image/png;base64,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" style="height:50px" alt="UKTC"><h2>Open the quote builder from a HubSpot deal</h2><p>This page needs the deal and price list passed from the UKTC quote card in HubSpot.</p></div>`;}
 else{
   key="uktcq_"+(C.deal?.id||"0");
-  S=load()||fresh();
+  S=load()||fresh();S.pk=S.pk||[];
   $("h-sub").textContent=[C.deal?.n,C.live?"HubSpot Product Library":C.matrix+" (offline price list)"].filter(Boolean).join(" · ");
   initCat();bindMeta();if(S.notes)$("notesbox").open=true;renderRows();changed();fitPreview();
 }
