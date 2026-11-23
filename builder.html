@@ -90,6 +90,35 @@ details summary{cursor:pointer;font-size:12px;color:var(--mut)}
 #linkbox{display:none;gap:6px;align-items:center}
 #linkbox input{font-size:11px}
 .kbd{font-size:10.5px;color:var(--mut)}
+#b-pl{width:100%;font-weight:600}
+.pl{position:fixed;inset:0;background:rgba(20,20,20,.5);z-index:60;display:flex;align-items:center;justify-content:center}
+.pl[hidden]{display:none}
+.plbox{background:#fff;width:min(1180px,95vw);height:min(840px,92vh);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,.35)}
+.plhd{display:flex;gap:10px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+#plq{flex:1;font-size:16px;padding:10px 12px;border-radius:8px}
+.plhd label{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--mut);white-space:nowrap}
+#pltgt{width:auto;max-width:330px;font-size:13px;padding:7px}
+.plbody{flex:1;display:flex;min-height:0}
+#plg{width:240px;overflow:auto;border-right:1px solid var(--line);padding:8px;background:#fafafa}
+#plg button{display:flex;justify-content:space-between;width:100%;text-align:left;border:none;background:none;padding:7px 9px;border-radius:6px;font-size:13px;cursor:pointer}
+#plg button:hover{background:#f0f0f0}
+#plg button.on{background:#fde8e9;color:var(--red);font-weight:600}
+#plg small{color:var(--mut);font-weight:400}
+#pll{flex:1;overflow:auto}
+#pll table{width:100%;border-collapse:collapse}
+#pll th.gh{position:sticky;top:0;background:#fff;text-align:left;color:var(--red);font-size:12px;padding:10px 14px 6px;border-bottom:1.5px solid var(--red);z-index:1}
+#pll td{padding:9px 14px;border-bottom:1px solid #f0f0f0;vertical-align:middle;font-size:13.5px}
+#pll tr.r:hover td{background:#fff7f7}
+#pll .gp{font-size:11.5px;color:var(--mut);margin-top:2px}
+#pll .pr{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;width:110px}
+#pll .ad{width:96px;text-align:right}
+#pll .ad button{min-width:74px}
+#pll tr.done td{background:var(--okb)}
+#pll mark{background:#fff1a8;padding:0}
+.tg{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:8px;background:#eef;color:#334;margin-left:6px}
+.tg.t{background:#fde8e9;color:var(--red)}
+.plft{display:flex;justify-content:space-between;gap:10px;padding:9px 16px;border-top:1px solid var(--line);font-size:12.5px}
+#plmsg{color:var(--ok);font-weight:600}
 @media (max-width:1150px){main{grid-template-columns:240px minmax(0,1fr) 0}#pv{display:none}.meta{grid-template-columns:repeat(4,1fr)}.meta .pj,.meta .tp{grid-column:span 2}#chips{max-height:76px;overflow:auto}}
 @media (max-width:900px){html,body{height:auto}body{display:block}main{display:block!important}aside{border-right:0;border-bottom:1px solid var(--line)}#cat{max-height:190px}#chips{max-height:52px;overflow:auto}#gridwrap{overflow:visible;padding:0 8px}#pv{display:none!important}.meta{grid-template-columns:1fr 1fr}.meta .pj,.meta .tp{grid-column:span 2}td input[type=number]{min-width:54px}.q{width:62px}}
 </style>
@@ -117,6 +146,7 @@ details summary{cursor:pointer;font-size:12px;color:var(--mut)}
 <main id="main">
   <aside>
     <div class="top">
+      <button id="b-pl" class="pri" title="Open the full price list (Ctrl+K)">Browse price list ⤢</button>
       <input type="text" id="q" placeholder="Search price list – e.g. SBI, 60 min, ExAp, smoke" autocomplete="off">
       <div id="chips"></div>
     </div>
@@ -414,6 +444,51 @@ else{
   $("h-sub").textContent=[C.deal?.n,C.live?"HubSpot Product Library":C.matrix+" (offline price list)"].filter(Boolean).join(" · ");
   initCat();bindMeta();if(S.notes)$("notesbox").open=true;renderRows();changed();fitPreview();
 }
+})();
+</script>
+<div id="pl" class="pl" hidden role="dialog" aria-modal="true" aria-label="Price list">
+ <div class="plbox">
+  <div class="plhd"><input id="plq" type="search" placeholder="Search by name, standard or SKU – e.g. 1634 60, SBI, ExAp timber, sampling" autocomplete="off" aria-label="Search price list">
+   <label for="pltgt">Add to</label><select id="pltgt"></select><button id="plx" class="pri">Done</button></div>
+  <div class="plbody"><nav id="plg" aria-label="Price list groups"></nav><div id="pll"></div></div>
+  <div class="plft"><span id="plmsg"></span><span class="kbd">Enter adds the top result · ↑↓ to move · Esc or Done closes · Ctrl+K opens</span></div>
+ </div>
+</div>
+<script>
+(function(){
+let plG="",plSel=0,plRows=[];
+const hl=(t,w)=>{let h=esc(t);for(const x of w){if(x.length<2)continue;h=h.replace(new RegExp("("+x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"),"<mark>$1</mark>")}return h};
+function targets(){const t=$("pltgt");t.innerHTML='<option value="">The quote (no test)</option>'+S.pk.map((p,i)=>`<option value="${p.id}">Test ${i+1} – ${esc(p.title.slice(0,60))}</option>`).join("");t.value=S.pk.some(p=>p.id===S.active)?S.active:""}
+function groups(){const cnt={};CAT.forEach(i=>cnt[i.g]=(cnt[i.g]||0)+1);
+  $("plg").innerHTML=[`<button data-g="" class="${plG?"":"on"}">All <small>${CAT.length}</small></button>`,...Object.keys(cnt).map(g=>`<button data-g="${esc(g)}" class="${plG===g?"on":""}">${esc(g)} <small>${cnt[g]}</small></button>`)].join("")}
+function render(){const w=$("plq").value.toLowerCase().split(/\s+/).filter(Boolean);
+  plRows=CAT.filter(i=>(!plG||i.g===plG)&&w.every(x=>(i.n+" "+i.g+" "+(i.sku||"")).toLowerCase().includes(x)));
+  if(plSel>=plRows.length)plSel=0;
+  let html="",cur=null;
+  plRows.forEach((i,k)=>{if(i.g!==cur){cur=i.g;html+=`<tr><th class="gh" colspan="3">${esc(cur)}</th></tr>`}
+    const test=typeof isTest==="function"&&isTest(i);
+    html+=`<tr class="r${k===plSel?" sel":""}" data-id="${esc(i.id)}" style="${k===plSel?"outline:2px solid #f3b0b4;outline-offset:-2px":""}"><td><div>${hl(i.n,w)}${test?'<span class="tg t">starts a test</span>':""}${i.x?'<span class="tg">optional by default</span>':""}</div><div class="gp">${esc(i.g)}${i.sku?" · "+hl(i.sku,w):""}</div></td><td class="pr">${i.poa?"POA":gbp(i.p)}</td><td class="ad"><button data-add="${esc(i.id)}">Add</button></td></tr>`});
+  $("pll").innerHTML=plRows.length?`<table>${html}</table>`:'<div class="empty" style="padding:40px">No matches. Try fewer words, or pick "All".</div>'}
+function add(id){const it=CAT.find(i=>String(i.id)===String(id));if(!it)return;S.active=$("pltgt").value;
+  const before=S.pk.length;addItem(it.id);
+  const tgt=S.pk.length>before?`new Test ${S.pk.length}`:(S.active?$("pltgt").selectedOptions[0].textContent:"the quote");
+  targets();$("plmsg").textContent=`Added: ${it.n.slice(0,70)} → ${tgt}`;
+  const tr=$("pll").querySelector(`tr[data-id="${CSS.escape(String(id))}"]`);if(tr){tr.classList.add("done");setTimeout(()=>tr.classList.remove("done"),900)}}
+window.plOpen=function(q){if(!CAT.length)return;$("pl").hidden=false;$("plq").value=q!=null?q:$("q").value;$("plmsg").textContent="";targets();groups();render();setTimeout(()=>{$("plq").focus();$("plq").select()},0)};
+const close=()=>{$("pl").hidden=true};
+$("b-pl").onclick=()=>plOpen("");
+$("plx").onclick=close;
+$("pl").addEventListener("mousedown",e=>{if(e.target.id==="pl")close()});
+$("plq").addEventListener("input",()=>{plSel=0;render()});
+$("plq").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){e.preventDefault();if(plRows[plSel])add(plRows[plSel].id)}
+  else if(e.key==="ArrowDown"){e.preventDefault();plSel=Math.min(plRows.length-1,plSel+1);render();$("pll").querySelector("tr.sel")?.scrollIntoView({block:"nearest"})}
+  else if(e.key==="ArrowUp"){e.preventDefault();plSel=Math.max(0,plSel-1);render();$("pll").querySelector("tr.sel")?.scrollIntoView({block:"nearest"})}});
+$("plg").onclick=e=>{const b=e.target.closest("button");if(!b)return;plG=b.dataset.g;plSel=0;groups();render();$("plq").focus()};
+$("pll").onclick=e=>{const b=e.target.closest("button[data-add]");if(b)add(b.dataset.add);else{const tr=e.target.closest("tr.r");if(tr)add(tr.dataset.id)}};
+$("pltgt").onchange=()=>{S.active=$("pltgt").value;if(typeof setActive==="function")setActive(S.active);$("plq").focus()};
+document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();plOpen()}else if(e.key==="Escape"&&!$("pl").hidden){close()}});
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.shiftKey){e.preventDefault();plOpen($("q").value)}});
 })();
 </script>
 </body>
