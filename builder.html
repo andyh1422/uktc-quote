@@ -402,11 +402,12 @@ async function saveToDeal(){
   const body={quote:{ref:refBase(),rev:S.rev,level:lvl,approver:lvl?S.ap:"",total:r2(t.tot),vat:r2(t.vat),opt:r2(t.opt),pct:r2(t.pct),vatT:S.vat,validUntil:vu,link:payload()},
     lines:S.lines.map(l=>({pid:l.pid||"",sku:l.sku||"",n:l.n,q:l.q,price:l.price||0,d:l.d||0,o:!!l.o,pk:pkRef(l)}))};
   b.disabled=true;b.textContent="Saving…";
-  try{await ensureRef();body.quote.ref=C.ref;body.quote.link=payload();const r=await api("/deal/save",{method:"POST",body:JSON.stringify(body)});
+  let ok=false;
+  try{await ensureRef();body.quote.ref=C.ref;body.quote.link=payload();const r=await api("/deal/save",{method:"POST",body:JSON.stringify(body)});C.saved={link:body.quote.link,status:r.status};ok=true;
     $("actmsg").textContent=`Saved to deal: ${r.lineItems} line item(s), ${gbp(r.amount)} net – ${STATUS_TXT[r.status]||r.status}${r.status==="awaiting_approval"?` (needs ${LEVEL_TXT[lvl]})`:""}.`;
     $("saved").textContent="Saved to HubSpot "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
   }catch(e){$("actmsg").textContent="Save failed: "+e.message}
-  b.textContent="Save to deal";b.disabled=false;
+  b.textContent="Save to deal";b.disabled=false;return ok;
 }
 let pvT=null;
 function changed(light){
@@ -453,7 +454,12 @@ function bindMeta(){
   $("b-pv").onclick=()=>{$("main").classList.toggle("nopv");changed()};
   $("b-open").onclick=async()=>{const w=window.open("","_blank");try{await ensureRef()}catch(e){$("actmsg").textContent="Could not issue a quote number: "+e.message}if(w)w.location.href=payload();changed(true)};
   $("b-save").onclick=saveToDeal;
-  $("b-acc").onclick=async()=>{try{await ensureRef()}catch(e){$("actmsg").textContent="Could not issue a quote number: "+e.message;return}$("linkbox").style.display="flex";$("acclink").value=payload("accept");$("acclink").select()};
+  $("b-acc").onclick=async()=>{
+    if(!C.live){try{await ensureRef()}catch(e){$("actmsg").textContent="Could not issue a quote number: "+e.message;return}$("linkbox").style.display="flex";$("acclink").value=payload("accept");$("acclink").select();return}
+    // live: the link must be the exact version saved to the deal – online acceptance is checked against it
+    $("linkbox").style.display="none";if(!(await saveToDeal()))return;
+    if(C.saved.status==="awaiting_approval"){$("actmsg").textContent+=" The acceptance link will be available once the discount is approved and the quote is saved again.";return}
+    $("linkbox").style.display="flex";$("acclink").value=C.saved.link+"&a=1";$("acclink").select();$("actmsg").textContent+=" Acceptance link ready – it matches the version saved to the deal. Any later save replaces it.";};
   $("b-copy").onclick=async()=>{const i=$("acclink");i.select();try{await navigator.clipboard.writeText(i.value);$("b-copy").textContent="Copied"}catch(e){document.execCommand&&document.execCommand("copy");$("b-copy").textContent="Copied"}setTimeout(()=>$("b-copy").textContent="Copy link",1500)};
 }
 let clearArmed=0;
